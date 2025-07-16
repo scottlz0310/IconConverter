@@ -17,8 +17,9 @@
 2. 依存パッケージのインストール
 
 ```bash
-python -m venv .venv
-source .venv/Scripts/activate  # Windowsの場合
+python3 -m venv venv --system-site-packages
+source venv/bin/activate  # Linux/macOSの場合
+# source venv/Scripts/activate  # Windowsの場合
 pip install -r requirements.txt
 ```
 
@@ -26,7 +27,8 @@ pip install -r requirements.txt
 1. アプリを起動
 
 ```bash
-.venv/Scripts/python.exe IconConv.py
+source venv/bin/activate  # 仮想環境をアクティベート
+python IconConv.py
 ```
 
 2. 「Select PNG File」ボタンを押してPNG画像を選択
