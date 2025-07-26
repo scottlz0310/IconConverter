@@ -59,7 +59,7 @@ class TestIntegration:
             mock_open.assert_called_once()
             mock_preview.assert_called_once_with('/test/path/test.png')
             mock_save.assert_called_once()
-            mock_convert.assert_called_once_with('/test/path/test.png', '/test/path/test.ico')
+            mock_convert.assert_called_once_with('/test/path/test.png', '/test/path/test.ico', True, False)
 
 if __name__ == '__main__':
     unittest.main() 
