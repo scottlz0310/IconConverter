@@ -37,6 +37,12 @@ python IconConv.py
 ## ファイル構成
 - `IconConv.py` : メインアプリケーション
 - `requirements.txt` : 依存パッケージリスト
+- `docs/` : ドキュメント（詳細なコードレビュー等）
+- `CHANGELOG.md` : 変更履歴
+
+## ドキュメント
+- 詳細なコードレビューや技術的な解説は`docs/`ディレクトリ内にまとめています。
+- バージョンごとの変更履歴は[CHANGELOG.md](./CHANGELOG.md)をご覧ください。
 
 ## ライセンス
 このプロジェクトはMITライセンスです。
