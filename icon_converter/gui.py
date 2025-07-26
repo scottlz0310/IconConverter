@@ -3,19 +3,19 @@ from tkinter import filedialog, messagebox
 from PIL import Image, ImageTk
 import os
 from .logic import IconConverter
-from .config import WINDOW_SIZE, PREVIEW_SIZE, DEFAULT_PRESERVE_TRANSPARENCY
+from .config import WINDOW_SIZE, PREVIEW_SIZE, DEFAULT_PRESERVE_TRANSPARENCY, SUPPORTED_IMAGE_FORMATS
 
 class IconConverterApp:
     def __init__(self, root: tk.Tk):
         self.root = root
-        self.root.title("PNG to ICO Converter")
+        self.root.title("Image to ICO Converter")
         self.root.geometry(WINDOW_SIZE)
         self.converter = IconConverter()
         self.preview_img = None
         self._build_widgets()
 
     def _build_widgets(self):
-        self.btn_select_file = tk.Button(self.root, text="Select PNG File", command=self.select_file)
+        self.btn_select_file = tk.Button(self.root, text="Select Image File", command=self.select_file)
         self.btn_select_file.pack(pady=10)
 
         # 透明化オプションのフレーム
@@ -56,7 +56,7 @@ class IconConverterApp:
             self.transparency_var.set(False)
 
     def select_file(self):
-        file_path = filedialog.askopenfilename(filetypes=[("PNG files", "*.png")])
+        file_path = filedialog.askopenfilename(filetypes=SUPPORTED_IMAGE_FORMATS)
         if file_path:
             self.show_preview(file_path)
             base = os.path.splitext(os.path.basename(file_path))[0]
@@ -69,7 +69,7 @@ class IconConverterApp:
             if save_path:
                 preserve_transparency = self.transparency_var.get()
                 auto_transparent_bg = self.auto_transparent_var.get()
-                self.converter.convert_png_to_ico(file_path, save_path, preserve_transparency, auto_transparent_bg)
+                self.converter.convert_image_to_ico(file_path, save_path, preserve_transparency, auto_transparent_bg)
 
     def show_preview(self, img_path: str):
         try:

@@ -1,7 +1,7 @@
 from PIL import Image
 from tkinter import messagebox
 from .config import ICON_SIZES
-from .utils import setup_logger
+from .utils import setup_logger, prepare_image_for_conversion, is_transparency_supported
 import numpy as np
 
 class IconConverter:
@@ -44,33 +44,38 @@ class IconConverter:
         
         return Image.fromarray(img_array)
 
-    def convert_png_to_ico(self, input_png_path: str, output_ico_path: str, preserve_transparency: bool = True, auto_transparent_bg: bool = False) -> None:
+    def convert_image_to_ico(self, input_path: str, output_ico_path: str, preserve_transparency: bool = True, auto_transparent_bg: bool = False) -> None:
         try:
-            png_image = Image.open(input_png_path)
+            image = Image.open(input_path)
+            
+            # ファイル形式に応じた透明化サポートチェック
+            if preserve_transparency and not is_transparency_supported(input_path):
+                self.logger.warning(f"ファイル形式 {input_path} は透明化をサポートしていません")
+                preserve_transparency = False
             
             # 自動背景透明化
             if auto_transparent_bg and not preserve_transparency:
-                background_color = self._detect_background_color(png_image)
-                png_image = self._make_color_transparent(png_image, background_color)
+                background_color = self._detect_background_color(image)
+                image = self._make_color_transparent(image, background_color)
                 self.logger.info(f"背景色 {background_color} を自動透明化")
             
-            # 透明化処理
-            elif preserve_transparency and png_image.mode != 'RGBA':
-                # RGB画像をRGBAに変換（透明チャンネル追加）
-                png_image = png_image.convert('RGBA')
-            elif not preserve_transparency and png_image.mode == 'RGBA':
-                # RGBA画像をRGBに変換（透明チャンネル削除）
-                png_image = png_image.convert('RGB')
+            # 画像前処理（utils.pyの責務）
+            image = prepare_image_for_conversion(image, preserve_transparency)
             
-            png_image.save(output_ico_path, format="ICO", sizes=ICON_SIZES)
+            image.save(output_ico_path, format="ICO", sizes=ICON_SIZES)
             
             if auto_transparent_bg and not preserve_transparency:
                 transparency_status = "自動背景透明化"
             else:
                 transparency_status = "透明化保持" if preserve_transparency else "透明化無効"
             
-            messagebox.showinfo("完了", f"PNG画像を複数サイズのICOファイルに変換しました。\n{transparency_status}")
-            self.logger.info(f"変換成功: {input_png_path} -> {output_ico_path} ({transparency_status})")
+            messagebox.showinfo("完了", f"画像を複数サイズのICOファイルに変換しました。\n{transparency_status}")
+            self.logger.info(f"変換成功: {input_path} -> {output_ico_path} ({transparency_status})")
         except Exception as e:
             messagebox.showerror("エラー", f"変換に失敗しました:\n{e}")
-            self.logger.error(f"変換失敗: {input_png_path} -> {output_ico_path} | {e}")
+            self.logger.error(f"変換失敗: {input_path} -> {output_ico_path} | {e}")
+
+    # 後方互換性のため、古い関数名も残す
+    def convert_png_to_ico(self, input_png_path: str, output_ico_path: str, preserve_transparency: bool = True, auto_transparent_bg: bool = False) -> None:
+        """後方互換性のためのエイリアス"""
+        self.convert_image_to_ico(input_png_path, output_ico_path, preserve_transparency, auto_transparent_bg)

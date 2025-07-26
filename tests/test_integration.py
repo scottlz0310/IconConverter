@@ -16,7 +16,7 @@ class TestIntegration:
 
     def test_app_initialization(self):
         """アプリケーションが正しく初期化されることを確認"""
-        assert self.app.root.title() == "PNG to ICO Converter"
+        assert self.app.root.title() == "Image to ICO Converter"
         assert hasattr(self.app, 'converter')
         assert hasattr(self.app, 'preview_img')
 
@@ -48,7 +48,7 @@ class TestIntegration:
         with patch('tkinter.filedialog.askopenfilename') as mock_open, \
              patch('tkinter.filedialog.asksaveasfilename') as mock_save, \
              patch.object(self.app, 'show_preview') as mock_preview, \
-             patch.object(self.app.converter, 'convert_png_to_ico') as mock_convert:
+             patch.object(self.app.converter, 'convert_image_to_ico') as mock_convert:
             
             # ファイル選択のシミュレーション
             mock_open.return_value = '/test/path/test.png'
