@@ -1,5 +1,27 @@
 # リファクタリング計画書
 
+## ディレクトリ構成（2024/06時点・Phase1計画）
+
+```
+IconConverter/
+├── main.py                # エントリーポイント
+├── icon_converter/        # アプリ本体（モジュール分割）
+│   ├── __init__.py
+│   ├── gui.py
+│   ├── logic.py
+│   ├── utils.py
+│   └── config.py
+├── tests/                 # テストコード
+├── debug/                 # デバッグ用ファイル・一時出力
+├── logs/                  # ログ出力（.gitignoreで管理外）
+├── docs/                  # ドキュメント
+│   ├── CODE_REVIEW.md
+│   └── REFACTOR_PLAN.md
+├── requirements.txt
+├── README.md
+└── CHANGELOG.md
+```
+
 ## 1. リファクタリング計画
 - 現状の課題整理
   - コードの可読性・保守性向上
