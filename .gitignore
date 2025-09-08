@@ -38,3 +38,13 @@ uv.lock
 *.db
 node_modules/
 requirements.txt
+
+# Auto-generated entries
+*.pyc
+.coverage
+.ruff_cache/
+
+# Auto-generated entries
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
