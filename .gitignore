@@ -108,3 +108,9 @@ sdist/
 var/
 venv.bak/
 wheels/
+
+# Auto-generated entries from templates
+*.vsix
+.history/
+.vscode/*.code-snippets
+.vscode/extensions.json
