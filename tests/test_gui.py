@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -85,7 +86,7 @@ class TestGUI:
                 self.app.show_preview(png_path)
                 mock_showerror.assert_not_called()
         finally:
-            os.unlink(png_path)
+            self._safe_remove_file(png_path)
 
     def test_show_preview_error(self):
         """プレビュー表示エラーテスト"""
@@ -148,3 +149,17 @@ class TestGUI:
             mock_tk.assert_called_once()
             mock_app.assert_called_once_with(mock_root)
             mock_root.mainloop.assert_called_once()
+
+    def _safe_remove_file(self, filepath):
+        """クロスプラットフォーム対応のファイル削除"""
+        for attempt in range(3):
+            try:
+                if os.path.exists(filepath):
+                    os.unlink(filepath)
+                break
+            except PermissionError:
+                if attempt < 2:  # 最大3回試行
+                    time.sleep(0.1)  # 100ms待機
+                else:
+                    # 最終試行でも失敗した場合はスキップ（テスト失敗にしない）
+                    pass

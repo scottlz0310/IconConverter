@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 from unittest.mock import patch
 
 from PIL import Image
@@ -40,8 +41,8 @@ class TestJPEGConversion:
 
         finally:
             # クリーンアップ
-            os.unlink(jpg_path)
-            os.unlink(ico_path)
+            self._safe_remove_file(jpg_path)
+            self._safe_remove_file(ico_path)
 
     def test_jpeg_transparency_warning(self):
         """JPEGファイルで透明化を試行した場合の警告テスト"""
@@ -64,8 +65,22 @@ class TestJPEGConversion:
             # 実際のログファイルを確認するか、ログハンドラーをモック化してテスト
 
         finally:
-            os.unlink(jpg_path)
-            os.unlink(ico_path)
+            self._safe_remove_file(jpg_path)
+            self._safe_remove_file(ico_path)
+
+    def _safe_remove_file(self, filepath):
+        """クロスプラットフォーム対応のファイル削除"""
+        for attempt in range(3):
+            try:
+                if os.path.exists(filepath):
+                    os.unlink(filepath)
+                break
+            except PermissionError:
+                if attempt < 2:  # 最大3回試行
+                    time.sleep(0.1)  # 100ms待機
+                else:
+                    # 最終試行でも失敗した場合はスキップ（テスト失敗にしない）
+                    pass
 
 
 if __name__ == "__main__":

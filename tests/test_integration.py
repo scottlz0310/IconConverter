@@ -1,5 +1,6 @@
 import os
 import tempfile
+import time
 from unittest.mock import patch
 
 from PIL import Image
@@ -39,8 +40,8 @@ class TestIntegration:
             assert ico_image.format == "ICO"
 
         finally:
-            os.unlink(png_path)
-            os.unlink(ico_path)
+            self._safe_remove_file(png_path)
+            self._safe_remove_file(ico_path)
 
     def test_transparency_workflow(self):
         """透明化ワークフローのテスト"""
@@ -66,8 +67,8 @@ class TestIntegration:
                 assert os.path.exists(ico_path)
 
         finally:
-            os.unlink(png_path)
-            os.unlink(ico_path)
+            self._safe_remove_file(png_path)
+            self._safe_remove_file(ico_path)
 
     def test_error_handling_integration(self):
         """エラーハンドリングの統合テスト"""
@@ -96,5 +97,19 @@ class TestIntegration:
                     assert os.path.getsize(ico_path) > 0
 
             finally:
-                os.unlink(img_path)
-                os.unlink(ico_path)
+                self._safe_remove_file(img_path)
+                self._safe_remove_file(ico_path)
+
+    def _safe_remove_file(self, filepath):
+        """クロスプラットフォーム対応のファイル削除"""
+        for attempt in range(3):
+            try:
+                if os.path.exists(filepath):
+                    os.unlink(filepath)
+                break
+            except PermissionError:
+                if attempt < 2:  # 最大3回試行
+                    time.sleep(0.1)  # 100ms待機
+                else:
+                    # 最終試行でも失敗した場合はスキップ（テスト失敗にしない）
+                    pass
