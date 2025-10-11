@@ -1,5 +1,26 @@
 # CHANGELOG
 
+## [v1.4.0] - 2025-10-12
+### Fixed
+- Windows環境でのテスト失敗問題を修正
+  - PermissionErrorによるファイル削除失敗を解決
+  - クロスプラットフォーム対応の_safe_remove_file()関数を追加
+  - リトライ機構とグレースフル処理を実装
+
+### Added
+- クロスプラットフォームCI対応
+  - Windows/Linux/macOSでの自動テスト実行
+  - 3 OS × 3 Pythonバージョン（3.11/3.12/3.13）のマトリクス
+  - プラットフォーム別のテスト実行環境を最適化
+- Pre-commit自動化
+  - コミット時の品質チェック自動実行
+  - ruff、mypy、各種フックの統合
+
+### Technical
+- 品質ルールPhase 6準拠のCI/CD構築
+- Conventional Commits準拠のコミット規約
+- SemVer準拠のバージョニング
+
 ## [v1.3.0] - 2024-06-XX
 ### Added
 - 複数画像形式対応を追加
