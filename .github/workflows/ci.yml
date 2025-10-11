@@ -17,8 +17,7 @@ jobs:
         os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: ["3.11", "3.12", "3.13"]
 
-    env:
-      UV_PYTHON: python
+    # No global UV_PYTHON override. Let uv pick its managed interpreter.
 
     steps:
     - uses: actions/checkout@v4
@@ -44,7 +43,14 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y xvfb
 
-    - name: Install dependencies
+    - name: Install dependencies (macOS)
+      if: runner.os == 'macOS'
+      env:
+        UV_PYTHON: python
+      run: uv sync
+
+    - name: Install dependencies (Windows/Linux)
+      if: runner.os != 'macOS'
       run: uv sync
 
     - name: Lint with ruff
