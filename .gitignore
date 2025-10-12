@@ -1,7 +1,10 @@
 # Python
 __pycache__/
 *.py[cod]
+*.pyo
+*.pyd
 *.so
+*.egg
 *.egg-info/
 .eggs/
 
@@ -9,108 +12,88 @@ __pycache__/
 .venv/
 venv/
 ENV/
+env/
+env.bak/
+venv.bak/
 
-# VSCode
+# Build and distribution
+dist/
+build/
+*.whl
+sdist/
+wheels/
+parts/
+lib/
+lib64/
+develop-eggs/
+eggs/
+var/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.hypothesis/
+.tox/
+.nox/
+nosetests.xml
+
+# Type checking and linting
+.mypy_cache/
+.ruff_cache/
+dmypy.json
+.dmypy.json
+
+# IDE and editors
 .vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+.history/
 
 # OS files
 .DS_Store
-Thumbs.db
-
-# その他
-*.log
-logs/
-
-# Added by add-autogen-gitignore.ps1 on 2025-09-03T15:56:25.1638025+09:00
-*.pyo
-*.pyd
-dist/
-build/
-*.egg
-*.whl
-.env
-.env.*
-.vscode.bak.*
-uv.lock
-.pytest_cache/
-.mypy_cache/
-*.sqlite3
-*.db
-node_modules/
-requirements.txt
-
-# Auto-generated entries
-*.pyc
-.coverage
-.ruff_cache/
-
-# Auto-generated entries
-.vscode/settings.json
-.vscode/launch.json
-.vscode/tasks.json
-
-# Auto-generated entries from templates
-$RECYCLE.BIN/
-*$py.class
-*.7z
-*.backup
-*.bak
-*.cover
-*.manifest
-*.orig
-*.py,cover
-*.rar
-*.spec
-*.sublime-project
-*.sublime-workspace
-*.swo
-*.swp
-*.tar.gz
-*.temp
-*.tmp
-*.zip
-*~
 .DS_Store?
-.Python
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
 .Spotlight-V100
 .Trashes
 ._*
-.cache
-.coverage.*
-.dmypy.json
-.env.development.local
-.env.local
-.env.production.local
-.env.test.local
-.hypothesis/
-.idea/
-.installed.cfg
-.nox/
-.tox/
-.venv
-Desktop.ini
-MANIFEST
-coverage.xml
-cython_debug/
-develop-eggs/
-dmypy.json
-downloads/
-eggs/
-ehthumbs.db
-env.bak/
-env/
-htmlcov/
-lib/
-lib64/
-nosetests.xml
-parts/
-sdist/
-var/
-venv.bak/
-wheels/
 
-# Auto-generated entries from templates
-*.vsix
-.history/
-.vscode/*.code-snippets
-.vscode/extensions.json
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.bak
+*.backup
+*.orig
+*.swp
+*.swo
+logs/
+*~
+
+# Environment and secrets
+.env
+.env.*
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Archives
+*.zip
+*.tar.gz
+*.rar
+*.7z
+
+# Cache
+.cache/
+
+# Project specific
+output/
+.python-version
+
+# uv.lock is committed for reproducibility

@@ -1,9 +1,17 @@
+import os
 import tkinter as tk
 from tkinter import filedialog, messagebox
+
 from PIL import Image, ImageTk
-import os
+
+from .config import (
+    DEFAULT_PRESERVE_TRANSPARENCY,
+    PREVIEW_SIZE,
+    SUPPORTED_IMAGE_FORMATS,
+    WINDOW_SIZE,
+)
 from .logic import IconConverter
-from .config import WINDOW_SIZE, PREVIEW_SIZE, DEFAULT_PRESERVE_TRANSPARENCY, SUPPORTED_IMAGE_FORMATS
+
 
 class IconConverterApp:
     def __init__(self, root: tk.Tk):
@@ -11,7 +19,7 @@ class IconConverterApp:
         self.root.title("Image to ICO Converter")
         self.root.geometry(WINDOW_SIZE)
         self.converter = IconConverter()
-        self.preview_img = None
+        self.preview_img: ImageTk.PhotoImage | None = None
         self._build_widgets()
 
     def _build_widgets(self):
@@ -25,22 +33,19 @@ class IconConverterApp:
         # 透明化保持オプション
         self.transparency_var = tk.BooleanVar(value=DEFAULT_PRESERVE_TRANSPARENCY)
         self.chk_transparency = tk.Checkbutton(
-            options_frame, 
-            text="透明化保持", 
-            variable=self.transparency_var,
-            command=self._on_transparency_change
+            options_frame, text="透明化保持", variable=self.transparency_var, command=self._on_transparency_change
         )
-        self.chk_transparency.pack(anchor='w')
+        self.chk_transparency.pack(anchor="w")
 
         # 自動背景透明化オプション
         self.auto_transparent_var = tk.BooleanVar(value=False)
         self.chk_auto_transparent = tk.Checkbutton(
-            options_frame, 
-            text="自動背景透明化", 
+            options_frame,
+            text="自動背景透明化",
             variable=self.auto_transparent_var,
-            command=self._on_auto_transparent_change
+            command=self._on_auto_transparent_change,
         )
-        self.chk_auto_transparent.pack(anchor='w')
+        self.chk_auto_transparent.pack(anchor="w")
 
         self.lbl_preview = tk.Label(self.root, text="画像プレビュー", bg="#eee")
         self.lbl_preview.pack(pady=10, fill="both", expand=True)
@@ -62,9 +67,7 @@ class IconConverterApp:
             base = os.path.splitext(os.path.basename(file_path))[0]
             default_name = base + ".ico"
             save_path = filedialog.asksaveasfilename(
-                defaultextension=".ico",
-                filetypes=[("ICO files", "*.ico")],
-                initialfile=default_name
+                defaultextension=".ico", filetypes=[("ICO files", "*.ico")], initialfile=default_name
             )
             if save_path:
                 preserve_transparency = self.transparency_var.get()
@@ -80,6 +83,7 @@ class IconConverterApp:
             self.lbl_preview.image = self.preview_img
         except Exception as e:
             messagebox.showerror("エラー", f"プレビューの表示に失敗しました:\n{e}")
+
 
 def main():
     root = tk.Tk()
