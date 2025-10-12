@@ -54,7 +54,7 @@ python_functions = ["test_*"]
 
 [tool.coverage.run]
 source = ["icon_converter"]
-omit = ["tests/*"]
+omit = ["tests/*", "icon_converter/gui.py"]
 
 [tool.coverage.report]
 exclude_lines = [

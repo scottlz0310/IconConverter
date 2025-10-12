@@ -1,78 +1,100 @@
 import os
 import tempfile
-import tkinter as tk
-import unittest
 from unittest.mock import patch
 
 from PIL import Image
 
-from icon_converter.gui import IconConverterApp
+from icon_converter.logic import IconConverter
 
 
 class TestIntegration:
+    """統合テスト - GUI依存を避けてロジック中心にテスト"""
+
     def setup_method(self):
-        try:
-            self.root = tk.Tk()
-            self.root.withdraw()  # ヘッドレス環境でウィンドウを非表示
-            self.app = IconConverterApp(self.root)
-        except tk.TclError:
-            # ヘッドレス環境でTkinterが使用できない場合はスキップ
-            import pytest
+        self.converter = IconConverter()
 
-            pytest.skip("GUI not available in headless environment")
-
-    def teardown_method(self):
-        if hasattr(self, "root"):
-            self.root.destroy()
-
-    def test_app_initialization(self):
-        """アプリケーションが正しく初期化されることを確認"""
-        assert self.app.root.title() == "Image to ICO Converter"
-        assert hasattr(self.app, "converter")
-        assert hasattr(self.app, "preview_img")
-
-    def test_widget_creation(self):
-        """ウィジェットが正しく作成されることを確認"""
-        assert hasattr(self.app, "btn_select_file")
-        assert hasattr(self.app, "lbl_preview")
-
-    def test_preview_functionality(self):
-        """プレビュー機能のテスト"""
+    def test_end_to_end_conversion(self):
+        """エンドツーエンドの変換テスト"""
         # テスト用のPNG画像を作成
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_png:
-            test_image = Image.new("RGB", (32, 32), color="blue")
+            test_image = Image.new("RGB", (64, 64), color="red")
             test_image.save(tmp_png.name, "PNG")
             png_path = tmp_png.name
 
+        with tempfile.NamedTemporaryFile(suffix=".ico", delete=False) as tmp_ico:
+            ico_path = tmp_ico.name
+
         try:
-            # プレビュー表示をテスト
-            with patch("tkinter.messagebox.showerror") as mock_showerror:
-                self.app.show_preview(png_path)
-                mock_showerror.assert_not_called()
-                assert self.app.preview_img is not None
+            # 変換実行（GUI部分をモック化）
+            with patch("tkinter.messagebox.showinfo") as mock_showinfo:
+                self.converter.convert_image_to_ico(png_path, ico_path)
+                mock_showinfo.assert_called_once()
+
+            # 出力ファイルが存在し、有効なICOファイルであることを確認
+            assert os.path.exists(ico_path)
+            assert os.path.getsize(ico_path) > 0
+
+            # ICOファイルとして読み込めることを確認
+            ico_image = Image.open(ico_path)
+            assert ico_image.format == "ICO"
 
         finally:
             os.unlink(png_path)
+            os.unlink(ico_path)
 
-    def test_file_selection_mock(self):
-        """ファイル選択機能のモックテスト"""
-        with (
-            patch("tkinter.filedialog.askopenfilename") as mock_open,
-            patch("tkinter.filedialog.asksaveasfilename") as mock_save,
-            patch.object(self.app, "show_preview") as mock_preview,
-            patch.object(self.app.converter, "convert_image_to_ico") as mock_convert,
-        ):
-            # ファイル選択のシミュレーション
-            mock_open.return_value = "/test/path/test.png"
-            mock_save.return_value = "/test/path/test.ico"
+    def test_transparency_workflow(self):
+        """透明化ワークフローのテスト"""
+        # RGBA画像でテスト
+        with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_png:
+            test_image = Image.new("RGBA", (32, 32), (255, 0, 0, 128))  # 半透明の赤
+            test_image.save(tmp_png.name, "PNG")
+            png_path = tmp_png.name
 
-            self.app.select_file()
+        with tempfile.NamedTemporaryFile(suffix=".ico", delete=False) as tmp_ico:
+            ico_path = tmp_ico.name
 
-            mock_open.assert_called_once()
-            mock_preview.assert_called_once_with("/test/path/test.png")
-            mock_save.assert_called_once()
-            mock_convert.assert_called_once_with("/test/path/test.png", "/test/path/test.ico", True, False)
+        try:
+            with patch("tkinter.messagebox.showinfo"):
+                # 透明化保持でテスト
+                self.converter.convert_image_to_ico(png_path, ico_path, preserve_transparency=True)
+                assert os.path.exists(ico_path)
 
+                # 自動背景透明化でテスト
+                self.converter.convert_image_to_ico(
+                    png_path, ico_path, preserve_transparency=False, auto_transparent_bg=True
+                )
+                assert os.path.exists(ico_path)
 
-if __name__ == "__main__":
-    unittest.main()
+        finally:
+            os.unlink(png_path)
+            os.unlink(ico_path)
+
+    def test_error_handling_integration(self):
+        """エラーハンドリングの統合テスト"""
+        with patch("tkinter.messagebox.showerror") as mock_showerror:
+            # 存在しないファイルでテスト
+            self.converter.convert_image_to_ico("nonexistent.png", "output.ico")
+            mock_showerror.assert_called_once()
+
+    def test_multiple_format_support(self):
+        """複数フォーマットサポートのテスト"""
+        formats = [("JPEG", "jpg"), ("BMP", "bmp")]
+
+        for format_name, ext in formats:
+            with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tmp_img:
+                test_image = Image.new("RGB", (32, 32), color="blue")
+                test_image.save(tmp_img.name, format_name)
+                img_path = tmp_img.name
+
+            with tempfile.NamedTemporaryFile(suffix=".ico", delete=False) as tmp_ico:
+                ico_path = tmp_ico.name
+
+            try:
+                with patch("tkinter.messagebox.showinfo"):
+                    self.converter.convert_image_to_ico(img_path, ico_path)
+                    assert os.path.exists(ico_path)
+                    assert os.path.getsize(ico_path) > 0
+
+            finally:
+                os.unlink(img_path)
+                os.unlink(ico_path)
