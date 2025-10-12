@@ -11,11 +11,19 @@ from icon_converter.gui import IconConverterApp
 
 class TestIntegration:
     def setup_method(self):
-        self.root = tk.Tk()
-        self.app = IconConverterApp(self.root)
+        try:
+            self.root = tk.Tk()
+            self.root.withdraw()  # ヘッドレス環境でウィンドウを非表示
+            self.app = IconConverterApp(self.root)
+        except tk.TclError:
+            # ヘッドレス環境でTkinterが使用できない場合はスキップ
+            import pytest
+
+            pytest.skip("GUI not available in headless environment")
 
     def teardown_method(self):
-        self.root.destroy()
+        if hasattr(self, "root"):
+            self.root.destroy()
 
     def test_app_initialization(self):
         """アプリケーションが正しく初期化されることを確認"""
