@@ -95,5 +95,4 @@ logs/
 # Project specific
 output/
 .python-version
-
-# uv.lock is committed for reproducibility
+uv.lock
