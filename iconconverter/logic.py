@@ -5,12 +5,13 @@ import numpy as np
 from PIL import Image
 
 from .config import ICON_SIZES
+from loguru import logger
 from .utils import is_transparency_supported, prepare_image_for_conversion, setup_logger
 
 
 class IconConverter:
     def __init__(self):
-        self.logger = setup_logger(self.__class__.__name__)
+        setup_logger(self.__class__.__name__)
 
     def _detect_background_color(self, image: Image.Image, tolerance: int = 10) -> Any:
         """画像の四隅の色を検出して背景色を推定"""
@@ -61,14 +62,14 @@ class IconConverter:
 
             # ファイル形式に応じた透明化サポートチェック
             if preserve_transparency and not is_transparency_supported(input_path):
-                self.logger.warning(f"ファイル形式 {input_path} は透明化をサポートしていません")
+                logger.warning(f"ファイル形式 {input_path} は透明化をサポートしていません")
                 preserve_transparency = False
 
             # 自動背景透明化
             if auto_transparent_bg and not preserve_transparency:
                 background_color = self._detect_background_color(image)
                 image = self._make_color_transparent(image, background_color)
-                self.logger.info(f"背景色 {background_color} を自動透明化")
+                logger.info(f"背景色 {background_color} を自動透明化")
 
             # 画像前処理（utils.pyの責務）
             processed_image = prepare_image_for_conversion(image, preserve_transparency)
@@ -85,10 +86,10 @@ class IconConverter:
                 "完了",
                 f"画像を複数サイズのICOファイルに変換しました。\n{transparency_status}",
             )
-            self.logger.info(f"変換成功: {input_path} -> {output_ico_path} ({transparency_status})")
+            logger.info(f"変換成功: {input_path} -> {output_ico_path} ({transparency_status})")
         except Exception as e:
             messagebox.showerror("エラー", f"変換に失敗しました:\n{e}")
-            self.logger.error(f"変換失敗: {input_path} -> {output_ico_path} | {e}")
+            logger.error(f"変換失敗: {input_path} -> {output_ico_path} | {e}")
 
     # 後方互換性のため、古い関数名も残す
     def convert_png_to_ico(
