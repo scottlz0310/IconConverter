@@ -8,38 +8,38 @@
 
 ## フェーズ1: プロジェクト基盤構築
 
-- [ ] 1. プロジェクト構造のセットアップ
+- [x] 1. プロジェクト構造のセットアップ
   - 新しいディレクトリ構造を作成（backend/, frontend/）
   - 既存のiconconverterパッケージをbackend/coreに移動
   - .gitignoreの更新（node_modules, dist, .env等）
   - _要件: 1.1, 1.2, 1.3_
 
-- [ ] 2. バックエンドプロジェクトの初期化
-  - [ ] 2.1 FastAPIプロジェクトのセットアップ
+- [x] 2. バックエンドプロジェクトの初期化
+  - [x] 2.1 FastAPIプロジェクトのセットアップ
     - backend/pyproject.tomlの作成（FastAPI, uvicorn, python-multipart等の依存関係）
     - backend/main.pyの作成（FastAPIアプリケーションインスタンス）
     - CORS設定の追加
     - _要件: 1.1, 7.4_
-  - [ ] 2.2 既存ロジックの統合
+  - [x] 2.2 既存ロジックの統合
     - backend/core/にiconconverter（logic.py, utils.py, config.py）をコピー
     - インポートパスの調整
     - 既存ロジックが正常に動作することを確認
     - _要件: 1.4_
-  - [ ] 2.3 Pydanticモデルの作成
+  - [x] 2.3 Pydanticモデルの作成
     - backend/models.pyの作成
     - ConversionRequest, HealthResponse, ErrorResponseモデルの実装
     - _要件: 1.1_
 
-- [ ] 3. フロントエンドプロジェクトの初期化
-  - [ ] 3.1 Vite + React + TypeScriptプロジェクトの作成
+- [x] 3. フロントエンドプロジェクトの初期化
+  - [x] 3.1 Vite + React + TypeScriptプロジェクトの作成
     - `pnpm create vite frontend --template react-ts`
     - 基本的な依存関係のインストール（React, TypeScript）
     - _要件: 1.2_
-  - [ ] 3.2 開発ツールとリンターのセットアップ
+  - [x] 3.2 開発ツールとリンターのセットアップ
     - ESLint, Prettierの設定
     - Tailwind CSSのインストールと設定
     - _要件: 1.2_
-  - [ ] 3.3 shadcn/uiのセットアップ
+  - [x] 3.3 shadcn/uiのセットアップ
     - shadcn/ui CLIのインストール
     - 基本コンポーネント（Button, Card, Checkbox等）の追加
     - _要件: 6.1, 6.2_

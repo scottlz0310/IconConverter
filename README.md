@@ -1,6 +1,18 @@
 # Image to ICO Converter
 
-このプロジェクトは、様々な画像形式を複数サイズのICOファイルに変換するシンプルなGUIアプリケーションです。
+このプロジェクトは、様々な画像形式を複数サイズのICOファイルに変換するアプリケーションです。
+
+## 🚀 WebUI版（開発中）
+
+モダンなWebアプリケーション版を開発中です。ブラウザからアクセス可能で、より洗練されたUIとUXを提供します。
+
+- **バックエンド**: FastAPI + Python 3.13
+- **フロントエンド**: React 18 + TypeScript + Vite
+- **詳細**: [WebUI移行仕様書](.kiro/specs/webui-migration/)
+
+## デスクトップGUI版（既存）
+
+Tkinterベースのデスクトップアプリケーション版も引き続き利用可能です。
 
 ## 特徴
 - **複数画像形式対応**: PNG, JPEG, BMP, GIF, TIFF, WebP形式からICOファイルに変換
@@ -67,13 +79,32 @@ PYTHONPATH=. pytest tests/
 詳細は[tests/README.md](./tests/README.md)を参照してください。
 
 ## ファイル構成
+
+### WebUI版（開発中）
+```
+backend/              # FastAPIバックエンド
+├── core/            # 既存の画像処理ロジック（iconconverterから移行）
+├── services/        # ビジネスロジック層
+├── routers/         # APIエンドポイント
+└── tests/           # バックエンドテスト
+
+frontend/            # React + TypeScriptフロントエンド
+├── src/
+│   ├── components/  # UIコンポーネント
+│   ├── hooks/       # カスタムフック
+│   ├── stores/      # 状態管理（Zustand）
+│   ├── services/    # APIクライアント
+│   └── types/       # TypeScript型定義
+└── tests/           # フロントエンドテスト
+```
+
+### デスクトップGUI版（既存）
 - `main.py` : エントリーポイント
-- `icon_converter/` : アプリ本体（gui, logic, utils, config）
+- `iconconverter/` : アプリ本体（gui, logic, utils, config）
 - `tests/` : テストコード・テストガイド
 - `debug/` : デバッグ用
 - `logs/` : ログ出力（.gitignore管理外）
 - `docs/` : ドキュメント（詳細なコードレビュー等）
-- `requirements.txt` : 依存パッケージリスト
 - `CHANGELOG.md` : 変更履歴
 
 ## ドキュメント

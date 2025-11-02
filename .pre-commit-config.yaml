@@ -19,6 +19,7 @@ repos:
       - id: check-yaml
       - id: check-toml
       - id: check-json
+        exclude: '^frontend/tsconfig.*\.json$'
       - id: check-added-large-files
         args: ['--maxkb=1000']
       - id: check-merge-conflict
@@ -83,7 +84,10 @@ repos:
               \.mypy_cache/.*|
               \.pytest_cache/.*|
               \.ruff_cache/.*|
-              __pycache__/.*
+              __pycache__/.*|
+              frontend/pnpm-lock\.yaml$|
+              backend/uv\.lock$|
+              uv\.lock$
           )
 
 
@@ -97,7 +101,7 @@ repos:
 
   # Check for Python 2/3 compatibility issues
   - repo: https://github.com/asottile/add-trailing-comma
-    rev: v4.0.0
+    rev: v3.1.0
     hooks:
       - id: add-trailing-comma
         args: [--py36-plus]
@@ -111,7 +115,8 @@ repos:
         exclude: |
           (?x)^(
               \.github/workflows/.*\.ya?ml$|
-              \.pre-commit-config\.yaml$
+              \.pre-commit-config\.yaml$|
+              frontend/pnpm-lock\.yaml$
           )
 
   # Dockerfile linting
