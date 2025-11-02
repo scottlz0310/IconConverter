@@ -1,5 +1,5 @@
 # バックエンドDockerfile - FastAPI + uv
-FROM python:3.13-slim
+FROM python:3.14-slim
 
 # 作業ディレクトリの設定
 WORKDIR /app
