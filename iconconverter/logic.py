@@ -2,10 +2,10 @@ from tkinter import messagebox
 from typing import Any
 
 import numpy as np
+from loguru import logger
 from PIL import Image
 
 from .config import ICON_SIZES
-from loguru import logger
 from .utils import is_transparency_supported, prepare_image_for_conversion, setup_logger
 
 

@@ -1,4 +1,6 @@
 import os
+import sys
+
 from loguru import logger
 from PIL import Image
 
@@ -6,10 +8,10 @@ from PIL import Image
 def setup_logger(name: str) -> None:
     """Configure loguru logger with structured JSON output"""
     os.makedirs("logs", exist_ok=True)
-    
+
     # Remove default handler
     logger.remove()
-    
+
     # Add structured JSON file logging
     logger.add(
         "logs/app.log",
@@ -20,11 +22,15 @@ def setup_logger(name: str) -> None:
         encoding="utf-8",
         enqueue=True,
     )
-    
+
     # Add console output for development
+    console_format = (
+        "<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | "
+        "<cyan>{name}</cyan>:<cyan>{function}</cyan> | {message}"
+    )
     logger.add(
-        lambda msg: print(msg, end=""),
-        format="<green>{time:HH:mm:ss}</green> | <level>{level: <8}</level> | <cyan>{name}</cyan>:<cyan>{function}</cyan> | {message}",
+        sys.stderr,
+        format=console_format,
         level="INFO",
     )
 
