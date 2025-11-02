@@ -23,14 +23,7 @@ dependencies = [
     "pillow>=11.3.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.4.1",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.8.0",
-    "mypy>=1.13.0",
-    "pre-commit>=4.0.0",
-]
+
 
 [project.scripts]
 iconconverter = "iconconverter.gui:main"
@@ -98,6 +91,11 @@ fail_under = 80  # production段階では80%
 
 [dependency-groups]
 dev = [
+    "pytest>=8.4.1",
+    "pytest-cov>=6.0.0",
+    "ruff>=0.8.0",
+    "mypy>=1.13.0",
+    "pre-commit>=4.0.0",
     "detect-secrets>=1.5.0",
     "safety>=3.6.2",
 ]
