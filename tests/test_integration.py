@@ -3,9 +3,8 @@ import tempfile
 import time
 from unittest.mock import patch
 
-from PIL import Image
-
 from icon_converter.logic import IconConverter
+from PIL import Image
 
 
 class TestIntegration:
