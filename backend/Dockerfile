@@ -19,7 +19,7 @@ COPY pyproject.toml uv.lock* README.md ./
 # 依存関係のインストール（本番環境用、開発依存関係は除外）
 RUN uv sync --frozen --no-dev
 
-# アプリケーションコードのコピー
+# アプリケーションコードをコピー
 COPY . .
 
 # ポート8000を公開
@@ -29,5 +29,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8000/api/health || exit 1
 
-# uvicornでアプリケーションを起動
+# uvicornでアプリケーションを起動（/appがカレントディレクトリ）
 CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]

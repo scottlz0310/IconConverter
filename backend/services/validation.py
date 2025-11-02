@@ -4,6 +4,7 @@
 """
 
 import mimetypes
+import os
 from pathlib import Path
 from typing import BinaryIO
 
@@ -12,7 +13,7 @@ from PIL import Image
 from exceptions import FileSizeExceededError, InvalidFileFormatError
 
 # 定数
-MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
+MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", "10485760"))  # デフォルト: 10MB
 ALLOWED_MIME_TYPES = {
     "image/png",
     "image/jpeg",

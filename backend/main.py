@@ -4,6 +4,7 @@ import os
 import time
 import uuid
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -19,6 +20,9 @@ from exceptions import (
     InvalidFileFormatError,
 )
 from routers import convert, health
+
+# .envファイルを読み込む
+load_dotenv()
 
 # ロガーのセットアップ
 log_level = os.getenv("LOG_LEVEL", "INFO")
@@ -113,13 +117,13 @@ async def logging_middleware(request: Request, call_next):
 
 
 # CORS設定
-# 開発環境ではlocalhost:5173を許可、本番環境では環境変数で設定
+# 環境変数から許可オリジンを取得、デフォルトは開発環境用
+cors_origins_str = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000")
+cors_origins = [origin.strip() for origin in cors_origins_str.split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",  # Vite開発サーバー
-        "http://localhost:3000",  # 代替ポート
-    ],
+    allow_origins=cors_origins,
     allow_credentials=True,
     allow_methods=["GET", "POST"],
     allow_headers=["*"],

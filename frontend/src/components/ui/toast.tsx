@@ -6,6 +6,9 @@ const Toaster = ({ ...props }: ToasterProps) => {
   return (
     <Sonner
       className="toaster group"
+      position="bottom-right"
+      closeButton
+      richColors
       toastOptions={{
         classNames: {
           toast:
@@ -14,6 +17,8 @@ const Toaster = ({ ...props }: ToasterProps) => {
           actionButton: 'group-[.toast]:bg-primary group-[.toast]:text-primary-foreground',
           cancelButton: 'group-[.toast]:bg-muted group-[.toast]:text-muted-foreground',
         },
+        // アクセシビリティ設定
+        duration: 5000, // 5秒間表示（スクリーンリーダーが読み上げる時間を確保）
       }}
       {...props}
     />
