@@ -62,7 +62,10 @@ class TestIntegration:
 
                 # 自動背景透明化でテスト
                 self.converter.convert_image_to_ico(
-                    png_path, ico_path, preserve_transparency=False, auto_transparent_bg=True
+                    png_path,
+                    ico_path,
+                    preserve_transparency=False,
+                    auto_transparent_bg=True,
                 )
                 assert os.path.exists(ico_path)
 

@@ -78,7 +78,10 @@ class TestIconConverter:
             # 自動背景透明化オプションでテスト
             with patch("tkinter.messagebox.showinfo") as mock_showinfo:
                 self.converter.convert_image_to_ico(
-                    png_path, ico_path, preserve_transparency=False, auto_transparent_bg=True
+                    png_path,
+                    ico_path,
+                    preserve_transparency=False,
+                    auto_transparent_bg=True,
                 )
                 mock_showinfo.assert_called_once()
             assert os.path.exists(ico_path)
@@ -86,7 +89,10 @@ class TestIconConverter:
             # 透明化保持オプションでテスト
             with patch("tkinter.messagebox.showinfo") as mock_showinfo:
                 self.converter.convert_image_to_ico(
-                    png_path, ico_path, preserve_transparency=True, auto_transparent_bg=False
+                    png_path,
+                    ico_path,
+                    preserve_transparency=True,
+                    auto_transparent_bg=False,
                 )
                 mock_showinfo.assert_called_once()
 

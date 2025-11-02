@@ -33,7 +33,10 @@ class IconConverterApp:
         # 透明化保持オプション
         self.transparency_var = tk.BooleanVar(value=DEFAULT_PRESERVE_TRANSPARENCY)
         self.chk_transparency = tk.Checkbutton(
-            options_frame, text="透明化保持", variable=self.transparency_var, command=self._on_transparency_change
+            options_frame,
+            text="透明化保持",
+            variable=self.transparency_var,
+            command=self._on_transparency_change,
         )
         self.chk_transparency.pack(anchor="w")
 
@@ -67,7 +70,9 @@ class IconConverterApp:
             base = os.path.splitext(os.path.basename(file_path))[0]
             default_name = base + ".ico"
             save_path = filedialog.asksaveasfilename(
-                defaultextension=".ico", filetypes=[("ICO files", "*.ico")], initialfile=default_name
+                defaultextension=".ico",
+                filetypes=[("ICO files", "*.ico")],
+                initialfile=default_name,
             )
             if save_path:
                 preserve_transparency = self.transparency_var.get()
