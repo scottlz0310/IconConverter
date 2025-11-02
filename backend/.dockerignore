@@ -1,0 +1,46 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ログとデータ
+logs/
+*.log
+
+# テスト
+.coverage
+htmlcov/
+.tox/
+
+# Git
+.git/
+.gitignore
+
+# ドキュメント
+# README.md は pyproject.toml から参照されるため除外しない
+docs/
+*.md
+!README.md
+
+# その他
+.env
+.env.local

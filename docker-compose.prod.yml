@@ -1,0 +1,49 @@
+version: "3.8"
+
+services:
+  # バックエンドサービス（FastAPI - 本番環境）
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: iconconverter-backend-prod
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    environment:
+      - LOG_LEVEL=WARNING
+      - MAX_FILE_SIZE=10485760
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost}
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    networks:
+      - iconconverter-network
+
+  # フロントエンドサービス（nginx - 本番環境）
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: iconconverter-frontend-prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend
+    healthcheck:
+      test:
+        ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 5s
+    networks:
+      - iconconverter-network
+
+networks:
+  iconconverter-network:
+    driver: bridge

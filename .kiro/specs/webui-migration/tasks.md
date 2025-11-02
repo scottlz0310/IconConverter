@@ -48,51 +48,51 @@
 
 ## フェーズ2: バックエンドAPI実装
 
-- [ ] 4. バリデーションサービスの実装
-  - [ ] 4.1 ファイルバリデーション関数の作成
+- [x] 4. バリデーションサービスの実装
+  - [x] 4.1 ファイルバリデーション関数の作成
     - backend/services/validation.pyの作成
     - ファイル形式検証（MIME type, 拡張子, Pillow検証）
     - ファイルサイズ検証（10MB制限）
     - _要件: 7.1, 7.2_
-  - [ ] 4.2 カスタム例外クラスの作成
+  - [x] 4.2 カスタム例外クラスの作成
     - backend/exceptions.pyの作成
     - InvalidFileFormatError, FileSizeExceededError等の定義
     - _要件: 4.5_
 
-- [ ] 5. 画像変換サービスの実装
-  - [ ] 5.1 ImageConversionServiceクラスの作成
+- [x] 5. 画像変換サービスの実装
+  - [x] 5.1 ImageConversionServiceクラスの作成
     - backend/services/conversion.pyの作成
     - 既存のIconConverterクラスをラップ
     - 一時ファイル管理（作成・削除）
     - _要件: 4.2, 7.5_
-  - [ ] 5.2 非同期変換処理の実装
+  - [x] 5.2 非同期変換処理の実装
     - asyncioを使用した非同期処理
     - エラーハンドリングとログ記録
     - _要件: 4.2, 8.2, 8.3, 10.4_
 
-- [ ] 6. FastAPI エンドポイントの実装
-  - [ ] 6.1 /api/convert エンドポイントの実装
+- [x] 6. FastAPI エンドポイントの実装
+  - [x] 6.1 /api/convert エンドポイントの実装
     - backend/routers/convert.pyの作成
     - multipart/form-dataの受信処理
     - ValidationServiceによるバリデーション
     - ImageConversionServiceによる変換
     - StreamingResponseでICOファイルを返却
     - _要件: 4.1, 4.2, 4.3, 4.4_
-  - [ ] 6.2 /api/health エンドポイントの実装
+  - [x] 6.2 /api/health エンドポイントの実装
     - backend/routers/health.pyの作成
     - ヘルスチェックレスポンスの返却
     - _要件: 8.5_
-  - [ ] 6.3 エラーハンドラーの実装
+  - [x] 6.3 エラーハンドラーの実装
     - backend/main.pyにカスタム例外ハンドラーを追加
     - 適切なHTTPステータスコードとエラーメッセージ
     - _要件: 4.5_
 
-- [ ] 7. セキュリティとミドルウェアの実装
-  - [ ] 7.1 レート制限の追加
+- [x] 7. セキュリティとミドルウェアの実装
+  - [x] 7.1 レート制限の追加
     - slowapiライブラリの統合
     - /api/convertエンドポイントに10req/minの制限
     - _要件: 7.3_
-  - [ ] 7.2 ロギングミドルウェアの追加
+  - [x] 7.2 ロギングミドルウェアの追加
     - リクエストID生成とログ記録
     - 構造化ログ（JSON形式）
     - _要件: 8.1, 8.2, 8.4_
@@ -250,18 +250,18 @@
 
 ## フェーズ6: Docker化とデプロイメント
 
-- [ ] 19. Docker設定の作成
-  - [ ] 19.1 バックエンドDockerfileの作成
+- [x] 19. Docker設定の作成
+  - [x] 19.1 バックエンドDockerfileの作成
     - backend/Dockerfileの作成
     - uvを使用した依存関係インストール
     - uvicornでの起動設定
     - _要件: 9.1_
-  - [ ] 19.2 フロントエンドDockerfileの作成
+  - [x] 19.2 フロントエンドDockerfileの作成
     - frontend/Dockerfileの作成
     - マルチステージビルド（builder + nginx）
     - 本番ビルドの最適化
     - _要件: 9.1_
-  - [ ] 19.3 docker-compose.ymlの作成
+  - [x] 19.3 docker-compose.ymlの作成
     - 開発環境用のdocker-compose設定
     - バックエンド、フロントエンド、nginxサービス
     - ボリュームマウントとホットリロード設定

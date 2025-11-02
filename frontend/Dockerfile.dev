@@ -1,0 +1,23 @@
+# フロントエンド開発環境用Dockerfile
+FROM node:22-alpine
+
+# 作業ディレクトリの設定
+WORKDIR /app
+
+# pnpmの有効化
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# 依存関係ファイルのコピー
+COPY package.json pnpm-lock.yaml ./
+
+# 依存関係のインストール
+RUN pnpm install --frozen-lockfile
+
+# アプリケーションコードのコピー（ボリュームマウントで上書きされる）
+COPY . .
+
+# ポート5173を公開（Viteのデフォルトポート）
+EXPOSE 5173
+
+# Vite開発サーバーの起動
+CMD ["pnpm", "dev", "--host", "0.0.0.0"]
