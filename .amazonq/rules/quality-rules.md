@@ -26,7 +26,7 @@ pytest -q
 
 ### 4.3 型ヒント
 - PEP 484準拠。Any使用時はPRで理由を明記
-- 段階的厳格化: prototypeでは緩和、stagingで強化、productionでmypy strict相当へ
+- mypy strict
   - 推奨フラグ例: disallow-any-generics, no-implicit-optional, warn-redundant-casts等
 
 ### 4.4 セキュリティ静的解析
@@ -34,9 +34,7 @@ pytest -q
 - 補助: bandit等のセキュリティlinterを導入可
 
 ### 4.5 デバッグ・ログ
-- print使用は禁止。loggingを使用。ruff T20xで検出
-- 構造化ログ（JSON）を標準とする。lazy loggingを徹底
-- ログレベルの運用: DEBUG/INFO/WARNING/ERRORを適切に使用
+- print使用は禁止。loguruを使用。ruff T20xで検出
 
 ### 4.6 推奨ruffルール（例）
 - E/F/W（pycodestyle/pyflakes）, I（import order）, UP（pyupgrade）, B（bugbear）, C90x, T20x（print禁止）
@@ -121,13 +119,12 @@ production:
 ## Phase 6: CI/CD・自動化
 
 ### 6.1 マトリクス・キャッシュ
-- OS × Pythonバージョンのマトリクス（Windows/Linux/macOS × 3.11/3.12/3.13目安）
-- キャッシュキーはpyproject.tomlとuv.lockを含める
+- OS × Pythonバージョンのマトリクス（Windows/Linux/macOS × 3.12/3.13/3.14目安）
+- キャッシュキーはpyproject.tomlを含める
 
 ### 6.2 必須チェック
-- 依存再現性（uv sync）
 - lint（ruff）、type（mypy）、test+cov>=閾値
-- セキュリティスキャン（CodeQL/SCA/Secret scan/SBOM）
+- セキュリティスキャン（Bandit/CodeQL/Gitleaks/）
 - 秘密情報検出
 
 ### 6.3 デプロイ・環境保護

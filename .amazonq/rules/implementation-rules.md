@@ -82,13 +82,18 @@
 ## 開発環境・ツール要件
 
 ### 仮想環境・依存管理（uv必須）
-基本方針: uvを標準ツールとする。ロックファイル（uv.lock）は必ずコミット。
+基本方針: uvを標準ツールとする。
+```bash
+uv run `実行コマンド`
+uv add [--dev] `追加依存関係`
+```
+- python3の直接実行およびpip installは禁止。
 
 推奨セットアップ:
 ```bash
 # Linux/macOS
 curl -LsSf https://astral.sh/uv/install.sh | sh
-pipx install uv
+brew install uv
 # Windows PowerShell
 irm https://astral.sh/uv/install.ps1 | iex
 scoop install uv
@@ -110,7 +115,7 @@ uv run python -m pytest      # 仮想環境で実行
 - CIではuv syncによる再現性検証必須
 
 ### Pythonバージョンポリシー
-- サポート: 直近LTSと最新安定版（例: 3.11/3.12/3.13）をCIマトリクスで検証
+- サポート: 直近LTSと最新安定版（例: 3.12/3.13/3.14）をCIマトリクスで検証
 - EOL到来前にマイグレーション計画を作成
 - pyproject.tomlのrequires-pythonを最新方針に整合
 
