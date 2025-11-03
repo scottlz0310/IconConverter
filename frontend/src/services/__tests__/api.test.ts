@@ -2,7 +2,7 @@
  * APIクライアントのテスト
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi } from 'vitest';
 import axios, { AxiosError } from 'axios';
 import {
   validateFile,
@@ -10,8 +10,10 @@ import {
   validateFileSize,
   MAX_FILE_SIZE,
   parseApiError,
+  convertImage,
+  checkHealth,
 } from '../api';
-import type { ErrorResponse } from '../../types';
+import type { ErrorResponse, ConversionOptions } from '../../types';
 
 // axiosをモック
 vi.mock('axios', () => {
@@ -226,7 +228,96 @@ describe('APIクライアント', () => {
       const message = parseApiError(error);
       expect(message).toContain('予期しないエラー');
     });
+
+    it('400エラー（detailなし）を解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 400,
+          data: {},
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('画像の変換に失敗');
+    });
+
+    it('レスポンスのdetailメッセージを使用する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 404,
+          data: {
+            detail: 'リソースが見つかりません',
+          },
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toBe('リソースが見つかりません');
+    });
   });
 
+  describe('convertImage', () => {
+    it('画像を正常に変換する', async () => {
+      const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
+      const mockPost = vi.fn().mockResolvedValue({ data: mockBlob });
 
+      mockedAxios.create.mockReturnValue({
+        post: mockPost,
+        get: vi.fn(),
+        interceptors: {
+          request: { use: vi.fn(), eject: vi.fn() },
+          response: { use: vi.fn(), eject: vi.fn() },
+        },
+      } as unknown as ReturnType<typeof axios.create>);
+
+      const file = new File(['test'], 'test.png', { type: 'image/png' });
+      const options: ConversionOptions = {
+        preserveTransparency: true,
+        autoTransparentBg: false,
+      };
+
+      const result = await convertImage(file, options);
+
+      expect(result).toBe(mockBlob);
+      expect(mockPost).toHaveBeenCalledWith(
+        '/api/convert',
+        expect.any(FormData),
+        expect.objectContaining({
+          responseType: 'blob',
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+      );
+    });
+  });
+
+  describe('checkHealth', () => {
+    it('ヘルスチェックを正常に実行する', async () => {
+      const mockHealthResponse = {
+        status: 'healthy',
+        version: '2.0.0',
+        timestamp: '2024-01-01T00:00:00Z',
+      };
+      const mockGet = vi.fn().mockResolvedValue({ data: mockHealthResponse });
+
+      mockedAxios.create.mockReturnValue({
+        post: vi.fn(),
+        get: mockGet,
+        interceptors: {
+          request: { use: vi.fn(), eject: vi.fn() },
+          response: { use: vi.fn(), eject: vi.fn() },
+        },
+      } as unknown as ReturnType<typeof axios.create>);
+
+      const result = await checkHealth();
+
+      expect(result).toEqual(mockHealthResponse);
+      expect(mockGet).toHaveBeenCalledWith('/api/health');
+    });
+  });
 });

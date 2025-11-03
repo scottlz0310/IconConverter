@@ -174,11 +174,13 @@ class TestIconConverter:
 
     def test_convert_image_to_ico_error(self, converter, tmp_path):
         """無効な画像ファイルの変換エラーテスト"""
+        from PIL import UnidentifiedImageError
+
         input_path = tmp_path / "invalid.png"
         input_path.write_text("not an image")
         output_path = tmp_path / "output.ico"
 
-        with pytest.raises(Exception):
+        with pytest.raises(UnidentifiedImageError):
             converter.convert_image_to_ico(
                 input_path=str(input_path),
                 output_ico_path=str(output_path),

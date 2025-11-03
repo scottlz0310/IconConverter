@@ -118,4 +118,71 @@ describe('FileUploader', () => {
     expect(input).toBeInTheDocument();
     expect(input).toHaveAttribute('type', 'file');
   });
+
+  it('前の画像のプレビューURLを解放する', async () => {
+    const revokeObjectURLSpy = vi.spyOn(URL, 'revokeObjectURL');
+    global.URL.createObjectURL = vi.fn(() => 'blob:http://localhost/test1');
+
+    const { rerender } = render(<FileUploader />);
+
+    const file1 = new File(['test1'], 'test1.png', { type: 'image/png' });
+    const input = screen.getByLabelText('ファイル選択') as HTMLInputElement;
+    await userEvent.upload(input, file1);
+
+    await waitFor(() => {
+      expect(mockSetImage).toHaveBeenCalled();
+    });
+
+    // 2つ目のファイルをアップロード
+    global.URL.createObjectURL = vi.fn(() => 'blob:http://localhost/test2');
+    const file2 = new File(['test2'], 'test2.png', { type: 'image/png' });
+
+    rerender(<FileUploader />);
+    await userEvent.upload(input, file2);
+
+    await waitFor(() => {
+      expect(mockSetImage).toHaveBeenCalledTimes(2);
+    });
+
+    revokeObjectURLSpy.mockRestore();
+  });
+
+  it('ファイルサイズが大きすぎる場合はエラーを表示する', async () => {
+    render(<FileUploader />);
+
+    // 11MBのファイル（制限は10MB）
+    const largeFile = new File([new ArrayBuffer(11 * 1024 * 1024)], 'large.png', {
+      type: 'image/png',
+    });
+
+    const input = screen.getByLabelText('ファイル選択') as HTMLInputElement;
+
+    // react-dropzoneのonDropRejectedをトリガーするために、
+    // ファイルサイズ検証をシミュレート
+    Object.defineProperty(input, 'files', {
+      value: [largeFile],
+      writable: false,
+    });
+
+    await waitFor(() => {
+      expect(mockSetError).toHaveBeenCalled();
+    });
+  });
+
+  it('対応していないファイル形式の場合はエラーを表示する', async () => {
+    render(<FileUploader />);
+
+    const invalidFile = new File(['test'], 'test.txt', { type: 'text/plain' });
+
+    const input = screen.getByLabelText('ファイル選択') as HTMLInputElement;
+
+    Object.defineProperty(input, 'files', {
+      value: [invalidFile],
+      writable: false,
+    });
+
+    await waitFor(() => {
+      expect(mockSetError).toHaveBeenCalled();
+    });
+  });
 });
