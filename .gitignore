@@ -23,11 +23,12 @@ build/
 sdist/
 wheels/
 parts/
-lib/
 lib64/
 develop-eggs/
 eggs/
 var/
+# Python lib only (exclude frontend src/lib)
+/lib/
 
 # Testing and coverage
 .pytest_cache/
