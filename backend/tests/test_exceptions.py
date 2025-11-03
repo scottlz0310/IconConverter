@@ -134,4 +134,3 @@ class TestExceptionHandling:
 
         # 正常なサイズではエラーが発生しない
         validate_file(5 * 1024 * 1024)
-

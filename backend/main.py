@@ -3,10 +3,9 @@
 import os
 import time
 import uuid
-
-from dotenv import load_dotenv
 from collections.abc import Awaitable, Callable
 
+from dotenv import load_dotenv
 from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -50,7 +49,7 @@ app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # ty
 # セキュリティヘッダーミドルウェア
 @app.middleware("http")
 async def security_headers_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
+    request: Request, call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
     """セキュリティヘッダーを追加するミドルウェア
 
@@ -86,9 +85,7 @@ async def security_headers_middleware(
 
 # ロギングミドルウェア
 @app.middleware("http")
-async def logging_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]]
-) -> Response:
+async def logging_middleware(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
     """リクエストとレスポンスをログに記録するミドルウェア
 
     Args:

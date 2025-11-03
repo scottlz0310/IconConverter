@@ -3,7 +3,6 @@
 import sys
 from pathlib import Path
 
-import pytest
 from PIL import Image
 
 # backend ディレクトリをパスに追加
@@ -141,4 +140,3 @@ class TestIsTransparencySupported:
         """未知の形式の透明度非サポートテスト"""
         assert is_transparency_supported("test.txt") is False
         assert is_transparency_supported("test.pdf") is False
-

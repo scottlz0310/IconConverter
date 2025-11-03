@@ -216,4 +216,3 @@ class TestErrorResponse:
         json_data = response.model_dump()
         assert json_data["detail"] == "エラーが発生しました"
         assert json_data["error_code"] is None
-

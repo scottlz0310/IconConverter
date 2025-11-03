@@ -1,6 +1,5 @@
 """IconConverterクラスのユニットテスト"""
 
-import io
 import sys
 from pathlib import Path
 from unittest.mock import MagicMock, patch
@@ -115,9 +114,7 @@ class TestIconConverter:
             # ICOファイルのマジックバイトを確認
             assert ico_data[:4] == b"\x00\x00\x01\x00"
 
-    def test_convert_image_to_ico_with_transparency(
-        self, converter, tmp_path, sample_png_with_transparency_bytes
-    ):
+    def test_convert_image_to_ico_with_transparency(self, converter, tmp_path, sample_png_with_transparency_bytes):
         """透明度付き画像の変換テスト"""
         # 透明度付きPNG画像を作成
         input_path = tmp_path / "transparent.png"
@@ -133,9 +130,7 @@ class TestIconConverter:
 
         assert output_path.exists()
 
-    def test_convert_image_to_ico_auto_transparent_bg(
-        self, converter, temp_image_path, temp_output_path
-    ):
+    def test_convert_image_to_ico_auto_transparent_bg(self, converter, temp_image_path, temp_output_path):
         """自動背景透明化の変換テスト"""
         converter.convert_image_to_ico(
             input_path=temp_image_path,
@@ -161,9 +156,7 @@ class TestIconConverter:
 
         assert output_path.exists()
 
-    def test_convert_image_to_ico_unsupported_transparency(
-        self, converter, tmp_path, sample_jpeg_bytes
-    ):
+    def test_convert_image_to_ico_unsupported_transparency(self, converter, tmp_path, sample_jpeg_bytes):
         """透明化非対応形式での変換テスト"""
         input_path = tmp_path / "test.jpg"
         input_path.write_bytes(sample_jpeg_bytes)
@@ -191,9 +184,7 @@ class TestIconConverter:
                 output_ico_path=str(output_path),
             )
 
-    def test_convert_png_to_ico_backward_compatibility(
-        self, converter, temp_image_path, temp_output_path
-    ):
+    def test_convert_png_to_ico_backward_compatibility(self, converter, temp_image_path, temp_output_path):
         """後方互換性のためのconvert_png_to_icoテスト"""
         converter.convert_png_to_ico(
             input_png_path=temp_image_path,
@@ -222,4 +213,3 @@ class TestIconConverter:
             mock_open.assert_called_once_with(temp_image_path)
             # saveが呼ばれたことを確認
             mock_image.save.assert_called_once()
-

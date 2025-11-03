@@ -1,9 +1,7 @@
 """ルーターモジュールのユニットテスト"""
 
-import io
 import sys
 from pathlib import Path
-from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
@@ -88,4 +86,3 @@ class TestHealthEndpointLogic:
         assert hasattr(response, "version")
         assert response.status == "healthy"
         assert response.version == "2.0.0"
-
