@@ -1,6 +1,11 @@
 # バックエンドDockerfile - FastAPI + uv
 FROM python:3.14-slim
 
+# ロケール設定（UTF-8対応）
+ENV LANG=C.UTF-8 \
+    LC_ALL=C.UTF-8 \
+    PYTHONIOENCODING=utf-8
+
 # 作業ディレクトリの設定
 WORKDIR /app
 
