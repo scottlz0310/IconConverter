@@ -112,9 +112,18 @@ async def convert_image(
 
         logger.info(f"Conversion successful: {file.filename} -> {output_filename} ({len(ico_data)} bytes)")
 
-        # RFC 5987に従ってファイル名をエンコード（日本語対応）
+        # ファイル名を ASCII-safe にエンコード（RFC 5987に従う）
+        # Starlette は latin-1 エンコーディングのみをサポートするため、
+        # 日本語などの非ASCII文字は quote でエンコードする
         filename_utf8 = quote(output_filename, safe='')
-        content_disposition = f'attachment; filename="{output_filename}"; filename*=UTF-8\'\'{filename_utf8}'
+        # ファイル名にASCII以外の文字が含まれていない場合のみ日本語を使用
+        try:
+            output_filename.encode('ascii')
+            # ASCII対応の場合は日本語ファイル名を使う
+            content_disposition = f'attachment; filename="{output_filename}"; filename*=UTF-8\'\'{filename_utf8}'
+        except UnicodeEncodeError:
+            # ASCII非対応の場合はエンコード済みファイル名のみを使用
+            content_disposition = f'attachment; filename="{filename_utf8}"'
 
         # StreamingResponseでICOファイルを返却
         return StreamingResponse(
@@ -136,5 +145,6 @@ async def convert_image(
         error_str = str(e)
         safe_error = error_str.encode('utf-8', errors='replace').decode('utf-8')
         traceback_str = traceback.format_exc()
-        logger.error(f"Unexpected error during conversion: {safe_error}\n{traceback_str}", exc_info=True)
+        # logger.error()は f-string の {} を処理するため、traceback_str の } をエスケープ
+        logger.error("Unexpected error during conversion: {}\n{}", safe_error, traceback_str, exc_info=True)
         raise ConversionFailedError(f"変換処理でエラーが発生: {safe_error}") from e
