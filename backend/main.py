@@ -166,6 +166,7 @@ async def invalid_format_handler(request: Request, exc: InvalidFileFormatError) 
             "detail": str(exc),
             "error_code": "INVALID_FORMAT",
         },
+        media_type="application/json; charset=utf-8",
     )
 
 
@@ -187,6 +188,7 @@ async def file_size_handler(request: Request, exc: FileSizeExceededError) -> JSO
             "detail": str(exc),
             "error_code": "FILE_TOO_LARGE",
         },
+        media_type="application/json; charset=utf-8",
     )
 
 
@@ -202,19 +204,13 @@ async def conversion_failed_handler(request: Request, exc: ConversionFailedError
         JSONResponse: エラーレスポンス（500 Internal Server Error）
     """
     logger.error(f"Conversion failed: {exc}")
-    # エラーメッセージをUTF-8対応で安全に処理
-    try:
-        error_detail = str(exc)
-        error_detail.encode('utf-8')
-    except (UnicodeEncodeError, UnicodeDecodeError):
-        error_detail = "変換処理中にエラーが発生しました"
-
     return JSONResponse(
         status_code=500,
         content={
-            "detail": error_detail,
+            "detail": str(exc),
             "error_code": "CONVERSION_FAILED",
         },
+        media_type="application/json; charset=utf-8",
     )
 
 

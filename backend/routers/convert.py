@@ -133,11 +133,4 @@ async def convert_image(
     except Exception as e:
         # 予期しないエラー
         logger.error(f"Unexpected error during conversion: {e}", exc_info=True)
-        # エラーメッセージをUTF-8で安全にエンコード
-        error_msg = str(e)
-        try:
-            # UTF-8でエンコード可能か確認
-            error_msg.encode('utf-8')
-        except UnicodeEncodeError:
-            error_msg = repr(e)
-        raise ConversionFailedError(f"予期しないエラーが発生しました: {error_msg}") from e
+        raise ConversionFailedError(f"予期しないエラーが発生しました: {str(e)}") from e
