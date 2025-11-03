@@ -15,6 +15,7 @@ ENV/
 env/
 env.bak/
 venv.bak/
+uv.lock
 
 # Build and distribution
 dist/
