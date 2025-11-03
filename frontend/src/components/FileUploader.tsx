@@ -9,9 +9,10 @@
  * - 2.3: PNG, JPEG, BMP, GIF, TIFF, WebP形式をサポート
  * - 2.4: 画像ファイル選択時にプレビューを表示
  * - 2.5: 最大ファイルサイズ10MBの制限
+ * - 10.5: 画像プレビューの最適化（メモリ効率）
  */
 
-import { useCallback } from 'react';
+import { useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileImage } from 'lucide-react';
 import { toast } from 'sonner';
@@ -54,7 +55,8 @@ const formatFileSize = (bytes: number): string => {
  * FileUploaderコンポーネント
  */
 export function FileUploader() {
-  const { setImage, setError } = useImageStore();
+  const { image, setImage, setError } = useImageStore();
+  const previousPreviewRef = useRef<string | null>(null);
 
   /**
    * ファイルドロップ時の処理
@@ -65,23 +67,33 @@ export function FileUploader() {
       // エラーをクリア
       setError(null);
 
+      // メモリ最適化: 前の画像のData URLを解放
+      if (previousPreviewRef.current && previousPreviewRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(previousPreviewRef.current);
+        previousPreviewRef.current = null;
+      }
+
       // 拒否されたファイルがある場合
       if (rejectedFiles.length > 0) {
         const rejection = rejectedFiles[0];
         const errors = rejection.errors;
+        const file = rejection.file;
 
         let errorMessage = '';
         if (errors.some((e: any) => e.code === 'file-too-large')) {
-          errorMessage = `ファイルサイズが大きすぎます（最大${formatFileSize(MAX_FILE_SIZE)}）`;
+          const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+          errorMessage = `ファイルサイズが大きすぎます。最大${formatFileSize(MAX_FILE_SIZE)}までです。（現在のファイルサイズ: ${fileSizeMB}MB）`;
         } else if (errors.some((e: any) => e.code === 'file-invalid-type')) {
-          errorMessage = '対応していないファイル形式です。PNG, JPEG, BMP, GIF, TIFF, WebPのいずれかを選択してください。';
+          const fileExt = file.name.split('.').pop()?.toUpperCase() || '不明';
+          errorMessage = `対応していないファイル形式です（${fileExt}）。PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。`;
         } else {
-          errorMessage = 'ファイルのアップロードに失敗しました。';
+          errorMessage = 'ファイルのアップロードに失敗しました。別のファイルをお試しください。';
         }
 
         setError(errorMessage);
         toast.error('ファイルエラー', {
           description: errorMessage,
+          duration: 5000,
         });
         return;
       }
@@ -96,6 +108,8 @@ export function FileUploader() {
 
       // Data URLを生成してImageFileオブジェクトを作成
       const preview = URL.createObjectURL(file);
+      previousPreviewRef.current = preview;
+
       const imageFile: ImageFile = {
         file,
         preview,
@@ -112,7 +126,7 @@ export function FileUploader() {
         description: `${file.name} (${formatFileSize(file.size)})`,
       });
     },
-    [setImage, setError]
+    [setImage, setError, image]
   );
 
   /**

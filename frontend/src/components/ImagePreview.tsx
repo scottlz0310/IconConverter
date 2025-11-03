@@ -5,8 +5,10 @@
  *
  * 要件:
  * - 2.4: 画像ファイル選択時にプレビューを表示
+ * - 10.5: 画像プレビューの最適化（メモリ効率）
  */
 
+import { useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useImageStore } from '../stores/imageStore';
@@ -44,6 +46,7 @@ const getFormatName = (mimeType: string): string => {
  */
 export function ImagePreview() {
   const { image, status, reset } = useImageStore();
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // 画像が選択されていない場合は何も表示しない
   if (!image) {
@@ -54,12 +57,36 @@ export function ImagePreview() {
   const isProcessing = status === 'uploading' || status === 'converting';
 
   /**
+   * メモリ最適化: コンポーネントアンマウント時にData URLを解放
+   */
+  useEffect(() => {
+    return () => {
+      if (image?.preview && image.preview.startsWith('blob:')) {
+        URL.revokeObjectURL(image.preview);
+      }
+    };
+  }, [image?.preview]);
+
+  /**
+   * 画像ロード時の最適化: デコード完了を待つ
+   */
+  useEffect(() => {
+    const img = imgRef.current;
+    if (img && img.complete) {
+      // 画像が既にロード済みの場合はデコード
+      img.decode().catch(() => {
+        // デコードエラーは無視（フォールバック）
+      });
+    }
+  }, [image?.preview]);
+
+  /**
    * 削除ボタンクリック時の処理
    * 要件2.4: 画像削除機能
    */
   const handleRemove = () => {
     // Data URLのメモリを解放
-    if (image.preview) {
+    if (image.preview && image.preview.startsWith('blob:')) {
       URL.revokeObjectURL(image.preview);
     }
     // ストアをリセット
@@ -102,9 +129,12 @@ export function ImagePreview() {
         {/* 画像表示エリア - レスポンシブな高さ */}
         <div className="flex justify-center items-center bg-accent/20 rounded-lg p-3 sm:p-4 min-h-[180px] sm:min-h-[200px] lg:min-h-[250px]">
           <img
+            ref={imgRef}
             src={image.preview}
             alt={`選択された画像: ${image.name}`}
             className="max-w-full max-h-[250px] sm:max-h-[300px] lg:max-h-[400px] object-contain rounded"
+            loading="lazy"
+            decoding="async"
           />
         </div>
 

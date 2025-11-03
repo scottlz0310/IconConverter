@@ -6,6 +6,7 @@
 
 import asyncio
 import tempfile
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import BinaryIO
 
@@ -13,6 +14,9 @@ from loguru import logger
 
 from core.logic import IconConverter
 from exceptions import ConversionFailedError
+
+# CPU集約的な処理用のスレッドプール（最大4ワーカー）
+_executor = ThreadPoolExecutor(max_workers=4, thread_name_prefix="iconconv")
 
 
 class ImageConversionService:
@@ -67,8 +71,14 @@ class ImageConversionService:
         """
         try:
             file_content.seek(0)
+            # チャンク単位で書き込み（メモリ効率向上）
+            chunk_size = 8192  # 8KB
             with open(temp_path, "wb") as f:
-                f.write(file_content.read())
+                while True:
+                    chunk = file_content.read(chunk_size)
+                    if not chunk:
+                        break
+                    f.write(chunk)
             logger.debug(f"Saved uploaded file to: {temp_path}")
         except Exception as e:
             logger.error(f"Failed to save uploaded file: {e}")
@@ -111,6 +121,9 @@ class ImageConversionService:
         Raises:
             ConversionFailedError: 変換処理が失敗した場合
         """
+        import time
+
+        start_time = time.time()
         input_temp_path = None
         output_temp_path = None
 
@@ -132,17 +145,23 @@ class ImageConversionService:
             )
 
             # IconConverterで変換
+            conversion_start = time.time()
             self.converter.convert_image_to_ico(
                 input_path=str(input_temp_path),
                 output_ico_path=str(output_temp_path),
                 preserve_transparency=preserve_transparency,
                 auto_transparent_bg=auto_transparent_bg,
             )
+            conversion_time = time.time() - conversion_start
 
             # 変換されたICOファイルを読み込み
             ico_data = self._read_ico_file(output_temp_path)
 
-            logger.info(f"Conversion completed successfully: {filename} -> ICO ({len(ico_data)} bytes)")
+            total_time = time.time() - start_time
+            logger.info(
+                f"Conversion completed successfully: {filename} -> ICO "
+                f"({len(ico_data)} bytes, conversion: {conversion_time:.3f}s, total: {total_time:.3f}s)",
+            )
 
             return ico_data
 
@@ -151,7 +170,7 @@ class ImageConversionService:
             raise
         except Exception as e:
             error_str = str(e)
-            safe_error = error_str.encode('utf-8', errors='replace').decode('utf-8')
+            safe_error = error_str.encode("utf-8", errors="replace").decode("utf-8")
             logger.error(f"Conversion failed for {filename}: {safe_error}")
             raise ConversionFailedError(f"画像の変換に失敗しました: {safe_error}") from e
 
@@ -183,10 +202,10 @@ class ImageConversionService:
         Raises:
             ConversionFailedError: 変換処理が失敗した場合
         """
-        # CPU集約的な処理を別スレッドで実行
+        # CPU集約的な処理を専用スレッドプールで実行（パフォーマンス最適化）
         loop = asyncio.get_event_loop()
         return await loop.run_in_executor(
-            None,
+            _executor,
             self.convert_to_ico,
             file_content,
             filename,

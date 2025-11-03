@@ -20,14 +20,17 @@ export const MAX_FILE_SIZE = Number(import.meta.env.VITE_MAX_FILE_SIZE) || 10485
 
 /**
  * エラーメッセージマッピング
+ * ユーザーフレンドリーで具体的なエラーメッセージを提供
  */
 const ERROR_MESSAGES: Record<string, string> = {
-  INVALID_FORMAT: '対応していないファイル形式です',
-  FILE_TOO_LARGE: 'ファイルサイズが大きすぎます（最大10MB）',
-  NETWORK_ERROR: 'ネットワークエラーが発生しました',
-  SERVER_ERROR: 'サーバーエラーが発生しました',
-  TIMEOUT_ERROR: 'リクエストがタイムアウトしました',
-  UNKNOWN_ERROR: '予期しないエラーが発生しました',
+  INVALID_FORMAT: '対応していないファイル形式です。PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。',
+  FILE_TOO_LARGE: 'ファイルサイズが大きすぎます。10MB以下の画像ファイルをご使用ください。',
+  NETWORK_ERROR: 'ネットワークエラーが発生しました。インターネット接続を確認して、もう一度お試しください。',
+  SERVER_ERROR: 'サーバーエラーが発生しました。しばらく時間をおいてから、もう一度お試しください。',
+  TIMEOUT_ERROR: 'リクエストがタイムアウトしました。ファイルサイズが大きい場合は時間がかかることがあります。もう一度お試しください。',
+  UNKNOWN_ERROR: '予期しないエラーが発生しました。問題が解決しない場合は、サポートにお問い合わせください。',
+  CONVERSION_FAILED: '画像の変換に失敗しました。別の画像ファイルをお試しください。',
+  RATE_LIMIT_EXCEEDED: 'リクエスト数が制限を超えました。しばらく時間をおいてから、もう一度お試しください。',
 };
 
 /**
@@ -106,8 +109,18 @@ export function parseApiError(error: unknown): string {
     if (status === 415) {
       return ERROR_MESSAGES.INVALID_FORMAT;
     }
+    if (status === 429) {
+      return ERROR_MESSAGES.RATE_LIMIT_EXCEEDED;
+    }
     if (status >= 500) {
       return ERROR_MESSAGES.SERVER_ERROR;
+    }
+    if (status === 400) {
+      // バリデーションエラーの場合は詳細メッセージを使用
+      if (errorData?.detail) {
+        return errorData.detail;
+      }
+      return ERROR_MESSAGES.CONVERSION_FAILED;
     }
 
     // バックエンドからのdetailメッセージを使用
@@ -215,9 +228,10 @@ export function validateFile(file: File): {
   }
 
   if (!validateFileSize(file)) {
+    const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
     return {
       valid: false,
-      error: ERROR_MESSAGES.FILE_TOO_LARGE,
+      error: `${ERROR_MESSAGES.FILE_TOO_LARGE}（現在のファイルサイズ: ${fileSizeMB}MB）`,
     };
   }
 

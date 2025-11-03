@@ -22,11 +22,11 @@ export function Layout({ children }: LayoutProps) {
       </a>
 
       {/* ヘッダー */}
-      <header className="border-b border-border bg-card" role="banner">
+      <header className="border-b border-border bg-card glass-effect sticky top-0 z-40 animate-fade-in" role="banner">
         <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 gradient-primary rounded-lg flex items-center justify-center transition-smooth hover-scale shadow-md">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
@@ -35,7 +35,7 @@ export function Layout({ children }: LayoutProps) {
                   strokeWidth="2"
                   strokeLinecap="round"
                   strokeLinejoin="round"
-                  className="w-5 h-5 text-primary-foreground"
+                  className="w-5 h-5 sm:w-6 sm:h-6 text-primary-foreground"
                 >
                   <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
                   <circle cx="8.5" cy="8.5" r="1.5" />
@@ -43,7 +43,7 @@ export function Layout({ children }: LayoutProps) {
                 </svg>
               </div>
               <div>
-                <h1 className="text-xl sm:text-2xl font-bold text-foreground">
+                <h1 className="text-xl sm:text-2xl font-bold text-foreground tracking-tight">
                   Image to ICO Converter
                 </h1>
                 <p className="text-xs sm:text-sm text-muted-foreground hidden sm:block">
@@ -69,16 +69,16 @@ export function Layout({ children }: LayoutProps) {
       </main>
 
       {/* フッター */}
-      <footer className="border-t border-border bg-card mt-auto" role="contentinfo">
-        <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
+      <footer className="border-t border-border bg-card mt-auto transition-smooth" role="contentinfo">
+        <div className="container mx-auto px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
             <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
               © 2024 Image to ICO Converter. All rights reserved.
             </p>
-            <div className="flex items-center space-x-4 text-xs sm:text-sm text-muted-foreground">
-              <span>対応形式: PNG, JPEG, BMP, GIF, TIFF, WebP</span>
+            <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
+              <span className="px-2 py-1 bg-muted/50 rounded-md">対応形式: PNG, JPEG, BMP, GIF, TIFF, WebP</span>
               <span className="hidden sm:inline">•</span>
-              <span className="hidden sm:inline">最大10MB</span>
+              <span className="hidden sm:inline px-2 py-1 bg-muted/50 rounded-md">最大10MB</span>
             </div>
           </div>
         </div>

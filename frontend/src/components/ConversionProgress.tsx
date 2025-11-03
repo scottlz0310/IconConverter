@@ -55,7 +55,7 @@ export function ConversionProgress() {
   const isProcessing = status === 'uploading' || status === 'converting';
 
   return (
-    <div className="space-y-2 sm:space-y-3" role="status" aria-live="polite" aria-atomic="true">
+    <div className="space-y-2 sm:space-y-3 animate-fade-in" role="status" aria-live="polite" aria-atomic="true">
       {/* ステータスメッセージとスピナー */}
       <div className="flex items-center gap-2 sm:gap-3">
         {isProcessing && (
@@ -64,7 +64,22 @@ export function ConversionProgress() {
             aria-hidden="true"
           />
         )}
-        <p className={`text-xs sm:text-sm font-medium ${
+        {status === 'success' && (
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400 flex-shrink-0 animate-scale-in"
+            aria-hidden="true"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+        <p className={`text-xs sm:text-sm font-medium transition-smooth ${
           status === 'success' ? 'text-green-600 dark:text-green-400' :
           status === 'error' ? 'text-destructive' :
           'text-muted-foreground'
@@ -77,7 +92,7 @@ export function ConversionProgress() {
       {(isProcessing || status === 'success') && (
         <Progress
           value={progress}
-          className="h-1.5 sm:h-2"
+          className="h-1.5 sm:h-2 transition-smooth"
           aria-label={`変換進行状況: ${progress}%`}
         />
       )}

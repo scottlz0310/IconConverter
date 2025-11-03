@@ -39,8 +39,11 @@ class ValidationService:
             FileSizeExceededError: ファイルサイズが制限を超えた場合
         """
         if file_size > MAX_FILE_SIZE:
+            max_size_mb = MAX_FILE_SIZE / (1024 * 1024)
+            current_size_mb = file_size / (1024 * 1024)
             raise FileSizeExceededError(
-                f"ファイルサイズが大きすぎます。最大{MAX_FILE_SIZE / (1024 * 1024):.0f}MBまでです。",
+                f"ファイルサイズが大きすぎます。最大{max_size_mb:.0f}MBまでです。"
+                f"（現在のファイルサイズ: {current_size_mb:.2f}MB）",
             )
 
     @staticmethod
@@ -58,18 +61,25 @@ class ValidationService:
         file_extension = Path(filename).suffix.lower()
         if file_extension not in ALLOWED_EXTENSIONS:
             raise InvalidFileFormatError(
-                f"サポートされていないファイル形式です: {file_extension}。対応形式: PNG, JPEG, BMP, GIF, TIFF, WebP",
+                f"サポートされていないファイル形式です（{file_extension}）。"
+                f"対応形式: PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。",
             )
 
         # MIMEタイプチェック（提供されている場合）
         if content_type:
             if content_type not in ALLOWED_MIME_TYPES:
-                raise InvalidFileFormatError(f"サポートされていないMIMEタイプです: {content_type}")
+                raise InvalidFileFormatError(
+                    f"サポートされていないMIMEタイプです（{content_type}）。"
+                    f"PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。",
+                )
         else:
             # MIMEタイプが提供されていない場合は拡張子から推測
             guessed_type, _ = mimetypes.guess_type(filename)
             if guessed_type and guessed_type not in ALLOWED_MIME_TYPES:
-                raise InvalidFileFormatError(f"サポートされていないファイル形式です: {guessed_type}")
+                raise InvalidFileFormatError(
+                    f"サポートされていないファイル形式です（{guessed_type}）。"
+                    f"PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。",
+                )
 
     @staticmethod
     def validate_image_content(file_content: BinaryIO) -> None:
@@ -101,8 +111,10 @@ class ValidationService:
             file_content.seek(0)
 
         except Exception as e:
+            error_msg = str(e)
             raise InvalidFileFormatError(
-                f"画像ファイルとして読み込めません。ファイルが破損しているか、サポートされていない形式です: {str(e)}",
+                f"画像ファイルとして読み込めません。ファイルが破損しているか、サポートされていない形式です。"
+                f"別の画像ファイルをお試しください。（エラー詳細: {error_msg}）",
             ) from e
 
     @classmethod

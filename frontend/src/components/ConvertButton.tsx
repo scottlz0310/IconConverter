@@ -108,7 +108,7 @@ export function ConvertButton() {
       onKeyDown={handleKeyDown}
       disabled={isDisabled}
       size="lg"
-      className="w-full text-sm sm:text-base min-h-[48px] sm:min-h-[52px] touch-manipulation focus:ring-2 focus:ring-primary focus:ring-offset-2"
+      className="w-full text-sm sm:text-base min-h-[48px] sm:min-h-[52px] touch-manipulation focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-smooth hover-scale shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
       aria-label={isPending ? '変換中' : 'ICOファイルに変換'}
       aria-busy={isPending}
     >
@@ -119,8 +119,8 @@ export function ConvertButton() {
         </>
       ) : (
         <>
-          <Download className="h-4 w-4 sm:h-5 sm:w-5" aria-hidden="true" />
-          <span className="ml-2">ICOファイルに変換</span>
+          <Download className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
+          <span className="ml-2 font-semibold">ICOファイルに変換</span>
         </>
       )}
     </Button>

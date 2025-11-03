@@ -3,6 +3,8 @@
 POST /api/convert - 画像をICOファイルに変換
 """
 
+import os
+import time
 from io import BytesIO
 from pathlib import Path
 from urllib.parse import quote
@@ -19,8 +21,10 @@ from services.validation import ValidationService
 
 router = APIRouter(prefix="/api", tags=["conversion"])
 
-# レート制限の設定
-limiter = Limiter(key_func=get_remote_address)
+# レート制限の設定（環境変数で制御）
+# TESTING=true の場合はレート制限を無効化
+ENABLE_RATE_LIMIT = os.getenv("TESTING", "false").lower() != "true"
+limiter = Limiter(key_func=get_remote_address, enabled=ENABLE_RATE_LIMIT)
 
 # サービスインスタンス
 validation_service = ValidationService()
@@ -75,6 +79,8 @@ async def convert_image(
     Raises:
         HTTPException: バリデーションエラーまたは変換エラー
     """
+    start_time = time.time()
+
     logger.info(
         f"Received conversion request: filename={file.filename}, "
         f"content_type={file.content_type}, "
@@ -84,43 +90,54 @@ async def convert_image(
 
     try:
         # ファイルコンテンツを読み込み
+        read_start = time.time()
         file_content = await file.read()
         file_size = len(file_content)
+        read_time = time.time() - read_start
 
         # BytesIOでラップ
         file_stream = BytesIO(file_content)
 
         # バリデーション
+        validation_start = time.time()
         validation_service.validate_uploaded_file(
             filename=file.filename or "unknown",
             file_size=file_size,
             file_content=file_stream,
             content_type=file.content_type,
         )
+        validation_time = time.time() - validation_start
 
         # 変換処理（非同期）
+        conversion_start = time.time()
         ico_data = await conversion_service.convert_to_ico_async(
             file_content=file_stream,
             filename=file.filename or "image.png",
             preserve_transparency=preserve_transparency,
             auto_transparent_bg=auto_transparent_bg,
         )
+        conversion_time = time.time() - conversion_start
 
         # 出力ファイル名を生成（元のファイル名から拡張子を除いて.icoを追加）
         original_name = Path(file.filename or "output").stem
         output_filename = f"{original_name}.ico"
 
-        logger.info(f"Conversion successful: {file.filename} -> {output_filename} ({len(ico_data)} bytes)")
+        total_time = time.time() - start_time
+        logger.info(
+            f"Conversion successful: {file.filename} -> {output_filename} "
+            f"({len(ico_data)} bytes, read: {read_time:.3f}s, validation: {validation_time:.3f}s, "
+            f"conversion: {conversion_time:.3f}s, total: {total_time:.3f}s)",
+        )
 
         # ファイル名を ASCII-safe にエンコード（RFC 5987に従う）
         # Starlette は latin-1 エンコーディングのみをサポートするため、
         # 日本語などの非ASCII文字は quote でエンコードする
-        filename_utf8 = quote(output_filename, safe='')
+        filename_utf8 = quote(output_filename, safe="")
         # ファイル名にASCII以外の文字が含まれていない場合のみ日本語を使用
         try:
-            output_filename.encode('ascii')
+            output_filename.encode("ascii")
             # ASCII対応の場合は日本語ファイル名を使う
-            content_disposition = f'attachment; filename="{output_filename}"; filename*=UTF-8\'\'{filename_utf8}'
+            content_disposition = f"attachment; filename=\"{output_filename}\"; filename*=UTF-8''{filename_utf8}"
         except UnicodeEncodeError:
             # ASCII非対応の場合はエンコード済みファイル名のみを使用
             content_disposition = f'attachment; filename="{filename_utf8}"'
@@ -142,9 +159,13 @@ async def convert_image(
     except Exception as e:
         # 予期しないエラー（詳細をログに記録）
         import traceback
+
         error_str = str(e)
-        safe_error = error_str.encode('utf-8', errors='replace').decode('utf-8')
+        safe_error = error_str.encode("utf-8", errors="replace").decode("utf-8")
         traceback_str = traceback.format_exc()
         # logger.error()は f-string の {} を処理するため、traceback_str の } をエスケープ
         logger.error("Unexpected error during conversion: {}\n{}", safe_error, traceback_str, exc_info=True)
-        raise ConversionFailedError(f"変換処理でエラーが発生: {safe_error}") from e
+        raise ConversionFailedError(
+            f"画像の変換に失敗しました。別の画像ファイルをお試しください。"
+            f"問題が解決しない場合は、サポートにお問い合わせください。（エラー詳細: {safe_error}）",
+        ) from e

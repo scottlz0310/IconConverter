@@ -45,6 +45,41 @@ app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
+# セキュリティヘッダーミドルウェア
+@app.middleware("http")
+async def security_headers_middleware(request: Request, call_next):
+    """セキュリティヘッダーを追加するミドルウェア
+
+    Args:
+        request: リクエストオブジェクト
+        call_next: 次のミドルウェアまたはエンドポイント
+
+    Returns:
+        Response: レスポンスオブジェクト
+    """
+    response = await call_next(request)
+
+    # セキュリティヘッダーを追加
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # Content-Security-Policyヘッダー（厳格な設定）
+    response.headers["Content-Security-Policy"] = (
+        "default-src 'none'; "
+        "img-src 'self' data:; "
+        "style-src 'self' 'unsafe-inline'; "
+        "script-src 'self'; "
+        "connect-src 'self'; "
+        "frame-ancestors 'none'; "
+        "base-uri 'self'; "
+        "form-action 'self'"
+    )
+
+    return response
+
+
 # ロギングミドルウェア
 @app.middleware("http")
 async def logging_middleware(request: Request, call_next):
