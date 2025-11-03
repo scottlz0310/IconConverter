@@ -20,6 +20,7 @@ def setup_logger(log_level: str = "INFO") -> None:
     logger.remove()
 
     # JSON形式のログを標準出力に追加
+    # encoding='utf-8'を明示的に指定してUTF-8エンコーディングを強制（日本語対応）
     logger.add(
         sys.stdout,
         format="{message}",
@@ -27,6 +28,7 @@ def setup_logger(log_level: str = "INFO") -> None:
         serialize=True,  # JSON形式で出力
         backtrace=True,
         diagnose=True,
+        encoding="utf-8",
     )
 
     logger.info(f"Logger initialized with level: {log_level}")

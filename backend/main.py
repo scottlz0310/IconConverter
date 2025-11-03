@@ -202,10 +202,17 @@ async def conversion_failed_handler(request: Request, exc: ConversionFailedError
         JSONResponse: エラーレスポンス（500 Internal Server Error）
     """
     logger.error(f"Conversion failed: {exc}")
+    # エラーメッセージをUTF-8対応で安全に処理
+    try:
+        error_detail = str(exc)
+        error_detail.encode('utf-8')
+    except (UnicodeEncodeError, UnicodeDecodeError):
+        error_detail = "変換処理中にエラーが発生しました"
+
     return JSONResponse(
         status_code=500,
         content={
-            "detail": str(exc),
+            "detail": error_detail,
             "error_code": "CONVERSION_FAILED",
         },
     )
