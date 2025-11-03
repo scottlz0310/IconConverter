@@ -5,6 +5,7 @@ POST /api/convert - 画像をICOファイルに変換
 
 from io import BytesIO
 from pathlib import Path
+from urllib.parse import quote
 
 from fastapi import APIRouter, File, Form, Request, UploadFile
 from fastapi.responses import StreamingResponse
@@ -111,12 +112,16 @@ async def convert_image(
 
         logger.info(f"Conversion successful: {file.filename} -> {output_filename} ({len(ico_data)} bytes)")
 
+        # RFC 5987に従ってファイル名をエンコード（日本語対応）
+        filename_utf8 = quote(output_filename, safe='')
+        content_disposition = f'attachment; filename="{output_filename}"; filename*=UTF-8\'\'{filename_utf8}'
+
         # StreamingResponseでICOファイルを返却
         return StreamingResponse(
             BytesIO(ico_data),
             media_type="application/octet-stream",
             headers={
-                "Content-Disposition": f'attachment; filename="{output_filename}"',
+                "Content-Disposition": content_disposition,
                 "Content-Length": str(len(ico_data)),
             },
         )
