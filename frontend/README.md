@@ -1,18 +1,16 @@
-# Image to ICO Converter - Frontend
+# Frontend - Image to ICO Converter
 
-React + TypeScript + Viteを使用したモダンなWebアプリケーションのフロントエンドです。
+React + TypeScript + Viteで構築されたモダンなWebアプリケーションフロントエンド。
 
 ## 技術スタック
 
-- **React 19** - UIライブラリ
-- **TypeScript 5.9** - 型安全性
-- **Vite 7** - 高速ビルドツール
-- **TanStack Query 5** - サーバー状態管理
-- **Zustand 5** - クライアント状態管理
-- **Tailwind CSS 4** - ユーティリティファーストCSS
-- **shadcn/ui** - 高品質UIコンポーネント
-- **Vitest** - ユニット・コンポーネントテスト
-- **Playwright** - E2Eテスト
+- **React 18** - UIライブラリ
+- **TypeScript 5.6** - 型安全性
+- **Vite 6** - 高速ビルドツール
+- **TanStack Query** - サーバー状態管理
+- **Zustand** - クライアント状態管理
+- **Tailwind CSS** - ユーティリティファーストCSS
+- **shadcn/ui** - UIコンポーネント
 
 ## セットアップ
 
@@ -20,7 +18,7 @@ React + TypeScript + Viteを使用したモダンなWebアプリケーション�
 # 依存関係のインストール
 pnpm install
 
-# 開発サーバーの起動
+# 開発サーバー起動
 pnpm dev
 
 # ビルド
@@ -35,30 +33,41 @@ pnpm preview
 ### ユニット・コンポーネントテスト
 
 ```bash
-# テストを実行
-pnpm test:run
-
-# ウォッチモード
+# テスト実行（watch mode）
 pnpm test
 
-# カバレッジ
+# テスト実行（1回のみ）
+pnpm test:run
+
+# カバレッジ付きテスト
 pnpm test:coverage
+
+# UIモードでテスト
+pnpm test:ui
 ```
 
 ### E2Eテスト
 
-```bash
-# E2Eテストを実行
-pnpm test:e2e
+E2Eテストは**CI環境でのみ実行**されます。ローカルでの実行は推奨されません。
 
-# UIモードで実行
-pnpm test:e2e:ui
+CI環境では以下のコマンドが使用されます:
+```bash
+pnpm test:e2e:ci
+```
+
+ローカルで実行する場合（非推奨）:
+```bash
+# バックエンドとフロントエンドを起動してから
+pnpm test:e2e
 
 # デバッグモード
 pnpm test:e2e:debug
+
+# UIモード
+pnpm test:e2e:ui
 ```
 
-詳細は [e2e/README.md](./e2e/README.md) を参照してください。
+**注意**: E2Eテストはバックエンドが起動している必要があります。
 
 ## コード品質
 
@@ -70,72 +79,43 @@ pnpm lint
 pnpm format
 ```
 
-Currently, two official plugins are available:
+## 環境変数
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+`.env`ファイルを作成して以下の変数を設定:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```env
+VITE_API_URL=http://localhost:8000
+VITE_MAX_FILE_SIZE=10485760
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## プロジェクト構造
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
 ```
+frontend/
+├── src/
+│   ├── components/     # Reactコンポーネント
+│   │   ├── ui/        # shadcn/ui基本コンポーネント
+│   │   └── __tests__/ # コンポーネントテスト
+│   ├── hooks/         # カスタムフック
+│   ├── stores/        # Zustand状態管理
+│   ├── services/      # APIクライアント
+│   ├── types/         # TypeScript型定義
+│   └── test/          # テスト設定
+├── e2e/               # E2Eテスト（CI専用）
+└── public/            # 静的ファイル
+```
+
+## 開発ガイドライン
+
+- コンポーネントはパスカルケース（`FileUploader.tsx`）
+- フックは`use`接頭辞（`useImageConversion.ts`）
+- 型定義はパスカルケース（`ImageFile`, `ConversionOptions`）
+- 関数はキャメルケース（`convertImage`, `handleUpload`）
+- 定数は大文字スネークケース（`MAX_FILE_SIZE`）
+
+## ブラウザサポート
+
+- Chrome（最新2バージョン）
+- Firefox（最新2バージョン）
+- Safari（最新2バージョン）
+- Edge（最新2バージョン）

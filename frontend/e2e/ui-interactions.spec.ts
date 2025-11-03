@@ -7,8 +7,11 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // テスト用の画像ファイルパス
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const TEST_IMAGE_PATH = path.join(__dirname, 'fixtures', 'test-image.png');
 
 test.describe('UI インタラクション', () => {

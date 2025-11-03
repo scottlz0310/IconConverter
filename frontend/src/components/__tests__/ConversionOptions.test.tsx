@@ -4,6 +4,8 @@
  * 要件3.1, 3.2, 3.3, 3.4, 3.5のテスト
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';

@@ -48,14 +48,6 @@ export function ImagePreview() {
   const { image, status, reset } = useImageStore();
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // 画像が選択されていない場合は何も表示しない
-  if (!image) {
-    return null;
-  }
-
-  // 要件5.5: 処理中はUIをブロックしない（削除ボタンのみ無効化）
-  const isProcessing = status === 'uploading' || status === 'converting';
-
   /**
    * メモリ最適化: コンポーネントアンマウント時にData URLを解放
    */
@@ -79,6 +71,14 @@ export function ImagePreview() {
       });
     }
   }, [image?.preview]);
+
+  // 画像が選択されていない場合は何も表示しない
+  if (!image) {
+    return null;
+  }
+
+  // 要件5.5: 処理中はUIをブロックしない（削除ボタンのみ無効化）
+  const isProcessing = status === 'uploading' || status === 'converting';
 
   /**
    * 削除ボタンクリック時の処理

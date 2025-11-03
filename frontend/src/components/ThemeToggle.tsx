@@ -1,23 +1,19 @@
-import { useTheme } from '@/hooks/useTheme'
-import { Button } from '@/components/ui/button'
+import { useTheme } from '@/hooks/useTheme';
+import { Button } from '@/components/ui/button';
 
 /**
  * ダークモード切替コンポーネント
  * ライトモードとダークモードを切り替えるボタンを提供
  */
 export function ThemeToggle() {
-  const { resolvedTheme, toggleTheme } = useTheme()
+  const { resolvedTheme, toggleTheme } = useTheme();
 
   return (
     <Button
       variant="ghost"
       size="icon"
       onClick={toggleTheme}
-      aria-label={
-        resolvedTheme === 'light'
-          ? 'ダークモードに切り替え'
-          : 'ライトモードに切り替え'
-      }
+      aria-label={resolvedTheme === 'light' ? 'ダークモードに切り替え' : 'ライトモードに切り替え'}
       className="min-h-[44px] min-w-[44px] h-11 w-11 touch-manipulation rounded-full"
     >
       {resolvedTheme === 'light' ? (
@@ -58,5 +54,5 @@ export function ThemeToggle() {
         </svg>
       )}
     </Button>
-  )
+  );
 }

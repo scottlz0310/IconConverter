@@ -23,14 +23,19 @@ export const MAX_FILE_SIZE = Number(import.meta.env.VITE_MAX_FILE_SIZE) || 10485
  * ユーザーフレンドリーで具体的なエラーメッセージを提供
  */
 const ERROR_MESSAGES: Record<string, string> = {
-  INVALID_FORMAT: '対応していないファイル形式です。PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。',
+  INVALID_FORMAT:
+    '対応していないファイル形式です。PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。',
   FILE_TOO_LARGE: 'ファイルサイズが大きすぎます。10MB以下の画像ファイルをご使用ください。',
-  NETWORK_ERROR: 'ネットワークエラーが発生しました。インターネット接続を確認して、もう一度お試しください。',
+  NETWORK_ERROR:
+    'ネットワークエラーが発生しました。インターネット接続を確認して、もう一度お試しください。',
   SERVER_ERROR: 'サーバーエラーが発生しました。しばらく時間をおいてから、もう一度お試しください。',
-  TIMEOUT_ERROR: 'リクエストがタイムアウトしました。ファイルサイズが大きい場合は時間がかかることがあります。もう一度お試しください。',
-  UNKNOWN_ERROR: '予期しないエラーが発生しました。問題が解決しない場合は、サポートにお問い合わせください。',
+  TIMEOUT_ERROR:
+    'リクエストがタイムアウトしました。ファイルサイズが大きい場合は時間がかかることがあります。もう一度お試しください。',
+  UNKNOWN_ERROR:
+    '予期しないエラーが発生しました。問題が解決しない場合は、サポートにお問い合わせください。',
   CONVERSION_FAILED: '画像の変換に失敗しました。別の画像ファイルをお試しください。',
-  RATE_LIMIT_EXCEEDED: 'リクエスト数が制限を超えました。しばらく時間をおいてから、もう一度お試しください。',
+  RATE_LIMIT_EXCEEDED:
+    'リクエスト数が制限を超えました。しばらく時間をおいてから、もう一度お試しください。',
 };
 
 /**
@@ -140,30 +145,22 @@ export function parseApiError(error: unknown): string {
  * @returns ICOファイルのBlob
  * @throws エラーが発生した場合
  */
-export async function convertImage(
-  file: File,
-  options: ConversionOptions
-): Promise<Blob> {
+export async function convertImage(file: File, options: ConversionOptions): Promise<Blob> {
   // FormDataの作成
   const formData = new FormData();
   formData.append('file', file);
   formData.append('preserve_transparency', String(options.preserveTransparency));
   formData.append('auto_transparent_bg', String(options.autoTransparentBg));
 
-  try {
-    // API呼び出し
-    const response = await apiClient.post<Blob>('/api/convert', formData, {
-      responseType: 'blob',
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-    });
+  // API呼び出し
+  const response = await apiClient.post<Blob>('/api/convert', formData, {
+    responseType: 'blob',
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
 
-    return response.data;
-  } catch (error) {
-    // エラーを再スロー（呼び出し側でハンドリング）
-    throw error;
-  }
+  return response.data;
 }
 
 /**
@@ -173,12 +170,8 @@ export async function convertImage(
  * @throws エラーが発生した場合
  */
 export async function checkHealth(): Promise<HealthResponse> {
-  try {
-    const response = await apiClient.get<HealthResponse>('/api/health');
-    return response.data;
-  } catch (error) {
-    throw error;
-  }
+  const response = await apiClient.get<HealthResponse>('/api/health');
+  return response.data;
 }
 
 /**

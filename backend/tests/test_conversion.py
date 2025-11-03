@@ -11,8 +11,8 @@ import pytest
 backend_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(backend_dir))
 
-from exceptions import ConversionFailedError
-from services.conversion import ImageConversionService
+from exceptions import ConversionFailedError  # noqa: E402
+from services.conversion import ImageConversionService  # noqa: E402
 
 
 class TestImageConversionService:

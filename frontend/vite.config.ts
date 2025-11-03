@@ -1,6 +1,7 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react'
-import path from 'path'
+/// <reference types="vitest" />
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -8,6 +9,32 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
+    },
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/test/setup.ts',
+    exclude: ['**/node_modules/**', '**/e2e/**', '**/dist/**'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['text', 'json', 'html'],
+      exclude: [
+        'node_modules/',
+        'src/test/',
+        'e2e/',
+        '**/*.d.ts',
+        '**/*.config.*',
+        '**/mockData',
+        '**/*.test.{ts,tsx}',
+        '**/*.spec.{ts,tsx}',
+      ],
+      thresholds: {
+        lines: 80,
+        functions: 80,
+        branches: 80,
+        statements: 80,
+      },
     },
   },
   server: {
@@ -32,14 +59,14 @@ export default defineConfig({
           if (id.includes('node_modules')) {
             // React関連
             if (id.includes('react') || id.includes('react-dom')) {
-              return 'react-vendor'
+              return 'react-vendor';
             }
             // TanStack Query
             if (id.includes('@tanstack/react-query')) {
-              return 'query-vendor'
+              return 'query-vendor';
             }
             // その他のvendor
-            return 'vendor'
+            return 'vendor';
           }
         },
       },
@@ -47,4 +74,4 @@ export default defineConfig({
     // チャンクサイズ警告の閾値を調整
     chunkSizeWarningLimit: 1000,
   },
-})
+});

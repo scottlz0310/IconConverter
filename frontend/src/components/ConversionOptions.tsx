@@ -93,7 +93,10 @@ export function ConversionOptions() {
               透明化保持
             </label>
           </div>
-          <p id="preserve-transparency-desc" className="text-xs sm:text-sm text-muted-foreground ml-7 sm:ml-9">
+          <p
+            id="preserve-transparency-desc"
+            className="text-xs sm:text-sm text-muted-foreground ml-7 sm:ml-9"
+          >
             既存の透明度を保持します（PNG、GIF、WebP形式）
           </p>
         </div>
@@ -120,7 +123,10 @@ export function ConversionOptions() {
               自動背景透明化
             </label>
           </div>
-          <p id="auto-transparent-bg-desc" className="text-xs sm:text-sm text-muted-foreground ml-7 sm:ml-9">
+          <p
+            id="auto-transparent-bg-desc"
+            className="text-xs sm:text-sm text-muted-foreground ml-7 sm:ml-9"
+          >
             四隅のピクセルから単色背景を検出して除去します
           </p>
         </div>

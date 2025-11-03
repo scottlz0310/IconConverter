@@ -55,7 +55,12 @@ export function ConversionProgress() {
   const isProcessing = status === 'uploading' || status === 'converting';
 
   return (
-    <div className="space-y-2 sm:space-y-3 animate-fade-in" role="status" aria-live="polite" aria-atomic="true">
+    <div
+      className="space-y-2 sm:space-y-3 animate-fade-in"
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+    >
       {/* ステータスメッセージとスピナー */}
       <div className="flex items-center gap-2 sm:gap-3">
         {isProcessing && (
@@ -79,11 +84,15 @@ export function ConversionProgress() {
             <polyline points="20 6 9 17 4 12" />
           </svg>
         )}
-        <p className={`text-xs sm:text-sm font-medium transition-smooth ${
-          status === 'success' ? 'text-green-600 dark:text-green-400' :
-          status === 'error' ? 'text-destructive' :
-          'text-muted-foreground'
-        }`}>
+        <p
+          className={`text-xs sm:text-sm font-medium transition-smooth ${
+            status === 'success'
+              ? 'text-green-600 dark:text-green-400'
+              : status === 'error'
+                ? 'text-destructive'
+                : 'text-muted-foreground'
+          }`}
+        >
           {message}
         </p>
       </div>

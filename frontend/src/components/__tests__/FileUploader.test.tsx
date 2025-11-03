@@ -4,6 +4,8 @@
  * 要件2.1, 2.2, 2.3, 2.5のテスト
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -91,5 +93,29 @@ describe('FileUploader', () => {
     // ファイル入力要素が存在することを確認
     const input = screen.getByLabelText('ファイル選択');
     expect(input).toBeInTheDocument();
+  });
+
+  it('ドロップゾーンが正しくレンダリングされる', () => {
+    render(<FileUploader />);
+
+    const dropzone = screen.getByRole('button', { name: /画像ファイルをアップロード/i });
+    expect(dropzone).toBeInTheDocument();
+    expect(dropzone).toHaveAttribute('tabindex', '0');
+  });
+
+  it('アップロードアイコンが表示される', () => {
+    render(<FileUploader />);
+
+    // Upload アイコンが存在することを確認（lucide-reactのUploadアイコン）
+    const uploadIcon = document.querySelector('svg');
+    expect(uploadIcon).toBeInTheDocument();
+  });
+
+  it('ファイル入力要素が存在する', () => {
+    render(<FileUploader />);
+
+    const input = screen.getByLabelText('ファイル選択');
+    expect(input).toBeInTheDocument();
+    expect(input).toHaveAttribute('type', 'file');
   });
 });

@@ -119,7 +119,10 @@ export function ConvertButton() {
         </>
       ) : (
         <>
-          <Download className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-y-0.5" aria-hidden="true" />
+          <Download
+            className="h-4 w-4 sm:h-5 sm:w-5 transition-transform group-hover:translate-y-0.5"
+            aria-hidden="true"
+          />
           <span className="ml-2 font-semibold">ICOファイルに変換</span>
         </>
       )}

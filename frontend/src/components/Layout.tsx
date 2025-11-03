@@ -1,8 +1,8 @@
-import type { ReactNode } from 'react'
-import { ThemeToggle } from './ThemeToggle'
+import type { ReactNode } from 'react';
+import { ThemeToggle } from './ThemeToggle';
 
 interface LayoutProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 /**
@@ -22,7 +22,10 @@ export function Layout({ children }: LayoutProps) {
       </a>
 
       {/* ヘッダー */}
-      <header className="border-b border-border bg-card glass-effect sticky top-0 z-40 animate-fade-in" role="banner">
+      <header
+        className="border-b border-border bg-card glass-effect sticky top-0 z-40 animate-fade-in"
+        role="banner"
+      >
         <div className="container mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-3">
@@ -63,20 +66,23 @@ export function Layout({ children }: LayoutProps) {
         role="main"
         tabIndex={-1}
       >
-        <div className="max-w-4xl mx-auto">
-          {children}
-        </div>
+        <div className="max-w-4xl mx-auto">{children}</div>
       </main>
 
       {/* フッター */}
-      <footer className="border-t border-border bg-card mt-auto transition-smooth" role="contentinfo">
+      <footer
+        className="border-t border-border bg-card mt-auto transition-smooth"
+        role="contentinfo"
+      >
         <div className="container mx-auto px-4 py-4 sm:py-6 sm:px-6 lg:px-8">
           <div className="flex flex-col sm:flex-row items-center justify-between space-y-2 sm:space-y-0">
             <p className="text-xs sm:text-sm text-muted-foreground text-center sm:text-left">
               © 2024 Image to ICO Converter. All rights reserved.
             </p>
             <div className="flex items-center space-x-3 sm:space-x-4 text-xs sm:text-sm text-muted-foreground">
-              <span className="px-2 py-1 bg-muted/50 rounded-md">対応形式: PNG, JPEG, BMP, GIF, TIFF, WebP</span>
+              <span className="px-2 py-1 bg-muted/50 rounded-md">
+                対応形式: PNG, JPEG, BMP, GIF, TIFF, WebP
+              </span>
               <span className="hidden sm:inline">•</span>
               <span className="hidden sm:inline px-2 py-1 bg-muted/50 rounded-md">最大10MB</span>
             </div>
@@ -84,5 +90,5 @@ export function Layout({ children }: LayoutProps) {
         </div>
       </footer>
     </div>
-  )
+  );
 }

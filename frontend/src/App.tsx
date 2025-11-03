@@ -1,24 +1,28 @@
-import { lazy, Suspense } from 'react'
-import { Layout } from './components/Layout'
-import { FileUploader } from './components/FileUploader'
-import { ConversionProgress } from './components/ConversionProgress'
-import { Toaster } from './components/ui/toast'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card'
-import { useImageStore } from './stores/imageStore'
+import { lazy, Suspense } from 'react';
+import { Layout } from './components/Layout';
+import { FileUploader } from './components/FileUploader';
+import { ConversionProgress } from './components/ConversionProgress';
+import { Toaster } from './components/ui/toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './components/ui/card';
+import { useImageStore } from './stores/imageStore';
 
 // コード分割: 画像選択後に必要なコンポーネントを遅延ロード（パフォーマンス最適化）
-const ImagePreview = lazy(() => import('./components/ImagePreview').then(m => ({ default: m.ImagePreview })))
+const ImagePreview = lazy(() =>
+  import('./components/ImagePreview').then((m) => ({ default: m.ImagePreview }))
+);
 const ConversionOptions = lazy(() =>
-  import('./components/ConversionOptions').then(m => ({ default: m.ConversionOptions })),
-)
-const ConvertButton = lazy(() => import('./components/ConvertButton').then(m => ({ default: m.ConvertButton })))
+  import('./components/ConversionOptions').then((m) => ({ default: m.ConversionOptions }))
+);
+const ConvertButton = lazy(() =>
+  import('./components/ConvertButton').then((m) => ({ default: m.ConvertButton }))
+);
 
 function App() {
-  const { image, error, status } = useImageStore()
+  const { image, error, status } = useImageStore();
 
   // 要件5.3, 5.4, 5.5: 状態に応じた表示制御
-  const isProcessing = status === 'uploading' || status === 'converting'
-  const showOptions = image && !isProcessing && status !== 'success'
+  const isProcessing = status === 'uploading' || status === 'converting';
+  const showOptions = image && !isProcessing && status !== 'success';
 
   return (
     <Layout>
@@ -51,7 +55,9 @@ function App() {
                 role="alert"
                 aria-live="assertive"
               >
-                <p className="text-xs sm:text-sm text-destructive font-medium break-words">{error}</p>
+                <p className="text-xs sm:text-sm text-destructive font-medium break-words">
+                  {error}
+                </p>
               </div>
             )}
 
@@ -76,7 +82,11 @@ function App() {
               </div>
             }
           >
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-scale-in" role="region" aria-label="画像変換エリア">
+            <div
+              className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 animate-scale-in"
+              role="region"
+              aria-label="画像変換エリア"
+            >
               {/* 画像プレビュー */}
               <div className="order-1">
                 <ImagePreview />
@@ -101,7 +111,7 @@ function App() {
       {/* トースト通知 */}
       <Toaster />
     </Layout>
-  )
+  );
 }
 
-export default App
+export default App;

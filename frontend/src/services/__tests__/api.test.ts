@@ -2,8 +2,35 @@
  * APIクライアントのテスト
  */
 
-import { describe, it, expect } from 'vitest';
-import { validateFile, validateFileFormat, validateFileSize, MAX_FILE_SIZE } from '../api';
+import { describe, it, expect, vi, beforeEach } from 'vitest';
+import axios, { AxiosError } from 'axios';
+import {
+  validateFile,
+  validateFileFormat,
+  validateFileSize,
+  MAX_FILE_SIZE,
+  parseApiError,
+} from '../api';
+import type { ErrorResponse } from '../../types';
+
+// axiosをモック
+vi.mock('axios', () => {
+  return {
+    default: {
+      create: vi.fn(() => ({
+        post: vi.fn(),
+        get: vi.fn(),
+        interceptors: {
+          request: { use: vi.fn(), eject: vi.fn() },
+          response: { use: vi.fn(), eject: vi.fn() },
+        },
+      })),
+      isAxiosError: vi.fn(),
+    },
+  };
+});
+
+const mockedAxios = vi.mocked(axios, true);
 
 describe('APIクライアント', () => {
   describe('validateFileFormat', () => {
@@ -75,6 +102,131 @@ describe('APIクライアント', () => {
       const result = validateFile(file);
       expect(result.valid).toBe(false);
       expect(result.error).toBeDefined();
+      expect(result.error).toContain('MB');
     });
   });
+
+  describe('parseApiError', () => {
+    it('タイムアウトエラーを解析する', () => {
+      const error = {
+        isAxiosError: true,
+        code: 'ECONNABORTED',
+        response: undefined,
+      } as AxiosError;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('タイムアウト');
+    });
+
+    it('ネットワークエラーを解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: undefined,
+      } as AxiosError;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('ネットワークエラー');
+    });
+
+    it('413エラー（ファイルサイズ超過）を解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 413,
+          data: {},
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('ファイルサイズが大きすぎます');
+    });
+
+    it('415エラー（無効な形式）を解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 415,
+          data: {},
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('対応していないファイル形式');
+    });
+
+    it('429エラー（レート制限）を解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 429,
+          data: {},
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('リクエスト数が制限');
+    });
+
+    it('500エラー（サーバーエラー）を解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 500,
+          data: {},
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('サーバーエラー');
+    });
+
+    it('400エラー（バリデーションエラー）を解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 400,
+          data: {
+            detail: 'カスタムエラーメッセージ',
+          },
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toBe('カスタムエラーメッセージ');
+    });
+
+    it('エラーコード付きエラーを解析する', () => {
+      const error = {
+        isAxiosError: true,
+        response: {
+          status: 400,
+          data: {
+            error_code: 'INVALID_FORMAT',
+            detail: 'Invalid format',
+          },
+        },
+      } as AxiosError<ErrorResponse>;
+
+      mockedAxios.isAxiosError.mockReturnValue(true);
+      const message = parseApiError(error);
+      expect(message).toContain('対応していないファイル形式');
+    });
+
+    it('未知のエラーを解析する', () => {
+      const error = new Error('Unknown error');
+
+      mockedAxios.isAxiosError.mockReturnValue(false);
+      const message = parseApiError(error);
+      expect(message).toContain('予期しないエラー');
+    });
+  });
+
+
 });

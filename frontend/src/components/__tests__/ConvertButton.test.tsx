@@ -4,8 +4,10 @@
  * 要件4.1, 4.2, 4.3, 4.4, 4.5のテスト
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { ConvertButton } from '../ConvertButton';
 import { useImageStore } from '../../stores/imageStore';
@@ -42,11 +44,22 @@ describe('ConvertButton', () => {
     type: 'image/png',
   };
 
+  let mockOnSuccess: ((blob: Blob) => void) | undefined;
+  let mockOnError: ((error: string) => void) | undefined;
+
   beforeEach(() => {
     vi.clearAllMocks();
-    (useImageConversion as any).mockReturnValue({
-      mutate: mockMutate,
-      isPending: false,
+    mockOnSuccess = undefined;
+    mockOnError = undefined;
+
+    // useImageConversionをモックして、コールバックをキャプチャ
+    (useImageConversion as any).mockImplementation((callbacks: any) => {
+      mockOnSuccess = callbacks?.onSuccess;
+      mockOnError = callbacks?.onError;
+      return {
+        mutate: mockMutate,
+        isPending: false,
+      };
     });
   });
 
@@ -134,5 +147,74 @@ describe('ConvertButton', () => {
     await userEvent.keyboard('{Enter}');
 
     expect(mockMutate).toHaveBeenCalled();
+  });
+
+  it('ボタンにアイコンが表示される', () => {
+    (useImageStore as any).mockReturnValue({
+      image: mockImage,
+      options: { preserveTransparency: true, autoTransparentBg: false },
+      setStatus: mockSetStatus,
+      setError: mockSetError,
+    });
+
+    render(<ConvertButton />);
+
+    // Downloadアイコンが存在することを確認
+    const icon = document.querySelector('svg');
+    expect(icon).toBeInTheDocument();
+  });
+
+  it('ボタンにaria属性が正しく設定されている', () => {
+    (useImageStore as any).mockReturnValue({
+      image: mockImage,
+      options: { preserveTransparency: true, autoTransparentBg: false },
+      setStatus: mockSetStatus,
+      setError: mockSetError,
+    });
+
+    render(<ConvertButton />);
+
+    const button = screen.getByRole('button', { name: /ICOファイルに変換/i });
+    expect(button).toHaveAttribute('aria-label', 'ICOファイルに変換');
+    expect(button).toHaveAttribute('aria-busy', 'false');
+  });
+
+  it('変換中はaria-busyがtrueになる', () => {
+    (useImageStore as any).mockReturnValue({
+      image: mockImage,
+      options: { preserveTransparency: true, autoTransparentBg: false },
+      setStatus: mockSetStatus,
+      setError: mockSetError,
+    });
+
+    (useImageConversion as any).mockImplementation((callbacks: any) => {
+      mockOnSuccess = callbacks?.onSuccess;
+      mockOnError = callbacks?.onError;
+      return {
+        mutate: mockMutate,
+        isPending: true,
+      };
+    });
+
+    render(<ConvertButton />);
+
+    const button = screen.getByRole('button', { name: /変換中/i });
+    expect(button).toHaveAttribute('aria-busy', 'true');
+  });
+
+  it('useImageConversionフックにonSuccessコールバックが渡される', () => {
+    (useImageStore as any).mockReturnValue({
+      image: mockImage,
+      options: { preserveTransparency: true, autoTransparentBg: false },
+      setStatus: mockSetStatus,
+      setError: mockSetError,
+    });
+
+    render(<ConvertButton />);
+
+    // useImageConversionが正しいコールバックで呼ばれたことを確認
+    expect(useImageConversion).toHaveBeenCalled();
+    expect(mockOnSuccess).toBeDefined();
+    expect(mockOnError).toBeDefined();
   });
 });

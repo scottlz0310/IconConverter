@@ -8,8 +8,11 @@
 import { test, expect } from '@playwright/test';
 import path from 'path';
 import fs from 'fs';
+import { fileURLToPath } from 'url';
 
 // テスト用の画像ファイルパス
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 const TEST_IMAGE_PATH = path.join(__dirname, 'fixtures', 'test-image.png');
 
 test.describe('画像変換フロー', () => {
@@ -39,7 +42,9 @@ test.describe('画像変換フロー', () => {
     await expect(page.getByText('画像ファイルをドラッグ&ドロップ')).toBeVisible();
   });
 
-  test('ファイルをアップロードしてプレビューが表示される（要件2.1, 2.2, 2.4）', async ({ page }) => {
+  test('ファイルをアップロードしてプレビューが表示される（要件2.1, 2.2, 2.4）', async ({
+    page,
+  }) => {
     // ファイル選択ボタンをクリック
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(TEST_IMAGE_PATH);

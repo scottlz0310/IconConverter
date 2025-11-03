@@ -66,6 +66,13 @@ disallow_any_generics = true
 warn_return_any = true
 strict_equality = true
 show_error_codes = true
+namespace_packages = true
+explicit_package_bases = true
+mypy_path = "."
+exclude = [
+    "^tests/",
+    "^__pycache__/",
+]
 
 [tool.pytest.ini_options]
 minversion = "6.0"
@@ -80,8 +87,8 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["backend"]
-omit = ["tests/*"]
+source = ["."]
+omit = ["tests/*", ".venv/*", "__pycache__/*"]
 
 [tool.coverage.report]
 exclude_lines = [

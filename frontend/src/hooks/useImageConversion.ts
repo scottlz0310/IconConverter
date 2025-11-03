@@ -58,12 +58,10 @@ interface ConvertImageParams {
  * @param options - TanStack Queryのオプション
  * @returns useMutationの結果
  */
-export function useImageConversion(
-  options?: {
-    onSuccess?: (data: Blob) => void;
-    onError?: (error: string) => void;
-  }
-): UseMutationResult<Blob, string, ConvertImageParams> {
+export function useImageConversion(options?: {
+  onSuccess?: (data: Blob) => void;
+  onError?: (error: string) => void;
+}): UseMutationResult<Blob, string, ConvertImageParams> {
   return useMutation<Blob, string, ConvertImageParams>({
     mutationFn: async ({ file, options: conversionOptions }: ConvertImageParams) => {
       try {

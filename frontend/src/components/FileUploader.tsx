@@ -48,14 +48,14 @@ const formatFileSize = (bytes: number): string => {
   const k = 1024;
   const sizes = ['Bytes', 'KB', 'MB', 'GB'];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
 /**
  * FileUploaderコンポーネント
  */
 export function FileUploader() {
-  const { image, setImage, setError } = useImageStore();
+  const { setImage, setError } = useImageStore();
   const previousPreviewRef = useRef<string | null>(null);
 
   /**
@@ -63,7 +63,10 @@ export function FileUploader() {
    * 要件2.4: Data URLの生成とストアへの保存
    */
   const onDrop = useCallback(
-    (acceptedFiles: File[], rejectedFiles: any[]) => {
+    (
+      acceptedFiles: File[],
+      rejectedFiles: { file: File; errors: { code: string; message: string }[] }[]
+    ) => {
       // エラーをクリア
       setError(null);
 
@@ -80,10 +83,10 @@ export function FileUploader() {
         const file = rejection.file;
 
         let errorMessage = '';
-        if (errors.some((e: any) => e.code === 'file-too-large')) {
+        if (errors.some((e) => e.code === 'file-too-large')) {
           const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
           errorMessage = `ファイルサイズが大きすぎます。最大${formatFileSize(MAX_FILE_SIZE)}までです。（現在のファイルサイズ: ${fileSizeMB}MB）`;
-        } else if (errors.some((e: any) => e.code === 'file-invalid-type')) {
+        } else if (errors.some((e) => e.code === 'file-invalid-type')) {
           const fileExt = file.name.split('.').pop()?.toUpperCase() || '不明';
           errorMessage = `対応していないファイル形式です（${fileExt}）。PNG、JPEG、BMP、GIF、TIFF、WebP形式の画像をご使用ください。`;
         } else {
@@ -126,7 +129,7 @@ export function FileUploader() {
         description: `${file.name} (${formatFileSize(file.size)})`,
       });
     },
-    [setImage, setError, image]
+    [setImage, setError]
   );
 
   /**
@@ -181,12 +184,8 @@ export function FileUploader() {
             <>
               <Upload className="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 text-muted-foreground" />
               <div className="space-y-1 sm:space-y-2">
-                <p className="text-base sm:text-lg font-medium">
-                  画像ファイルをドラッグ&ドロップ
-                </p>
-                <p className="text-xs sm:text-sm text-muted-foreground">
-                  または
-                </p>
+                <p className="text-base sm:text-lg font-medium">画像ファイルをドラッグ&ドロップ</p>
+                <p className="text-xs sm:text-sm text-muted-foreground">または</p>
               </div>
               <Button
                 type="button"
