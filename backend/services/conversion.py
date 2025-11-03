@@ -150,8 +150,10 @@ class ImageConversionService:
             # 既にConversionFailedErrorの場合はそのまま再送出
             raise
         except Exception as e:
-            logger.error(f"Conversion failed for {filename}: {e}")
-            raise ConversionFailedError(f"画像の変換に失敗しました: {str(e)}") from e
+            error_str = str(e)
+            safe_error = error_str.encode('utf-8', errors='replace').decode('utf-8')
+            logger.error(f"Conversion failed for {filename}: {safe_error}")
+            raise ConversionFailedError(f"画像の変換に失敗しました: {safe_error}") from e
 
         finally:
             # 一時ファイルをクリーンアップ
