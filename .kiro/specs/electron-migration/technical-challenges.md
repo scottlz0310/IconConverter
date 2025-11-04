@@ -38,7 +38,7 @@ const { createICO } = require('./ico-generator');
 async function convertToICO(inputBuffer, options) {
   const sizes = [16, 32, 48, 64, 128, 256];
   const images = await Promise.all(
-    sizes.map(size => 
+    sizes.map(size =>
       sharp(inputBuffer)
         .resize(size, size)
         .png()
@@ -67,11 +67,11 @@ def auto_transparent_background(image):
 async function autoTransparentBackground(buffer) {
   const image = sharp(buffer);
   const { data, info } = await image.raw().toBuffer({ resolveWithObject: true });
-  
+
   // 四隅の色を取得
   const corners = getCornerColors(data, info.width, info.height, info.channels);
   const bgColor = detectBackgroundColor(corners);
-  
+
   // 透明化処理
   return await image
     .raw()
@@ -90,13 +90,13 @@ async function autoTransparentBackground(buffer) {
 const { contextBridge, ipcRenderer } = require('electron');
 
 contextBridge.exposeInMainWorld('electronAPI', {
-  convertImage: (imageData, options) => 
+  convertImage: (imageData, options) =>
     ipcRenderer.invoke('convert-image', imageData, options),
-  
-  selectFile: () => 
+
+  selectFile: () =>
     ipcRenderer.invoke('select-file'),
-  
-  saveFile: (data, defaultPath) => 
+
+  saveFile: (data, defaultPath) =>
     ipcRenderer.invoke('save-file', data, defaultPath)
 });
 
@@ -122,7 +122,7 @@ async function selectImageFile() {
       { name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'bmp', 'gif', 'tiff', 'webp'] }
     ]
   });
-  
+
   if (!result.canceled) {
     return fs.readFile(result.filePaths[0]);
   }
@@ -149,7 +149,7 @@ class ImageProcessor {
   constructor() {
     this.worker = new Worker('./image-worker.js');
   }
-  
+
   async processImage(imageData, options) {
     return new Promise((resolve, reject) => {
       this.worker.postMessage({ imageData, options });
@@ -157,7 +157,7 @@ class ImageProcessor {
       this.worker.once('error', reject);
     });
   }
-  
+
   dispose() {
     this.worker.terminate();
   }
@@ -244,7 +244,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js')
     }
   });
-  
+
   // 既存React UIを読み込み
   win.loadFile('dist/index.html');
 }
@@ -256,13 +256,13 @@ function createWindow() {
 class ElectronImageService {
   async convertToICO(filePath, options) {
     const inputBuffer = await fs.readFile(filePath);
-    
+
     // バリデーション（既存ロジック移植）
     await this.validateImage(inputBuffer);
-    
+
     // 変換処理
     const icoBuffer = await this.processImage(inputBuffer, options);
-    
+
     return icoBuffer;
   }
 }
@@ -312,7 +312,7 @@ class ElectronAPI implements ImageAPI {
 }
 
 // 環境に応じて切り替え
-export const imageAPI: ImageAPI = 
+export const imageAPI: ImageAPI =
   window.electronAPI ? new ElectronAPI() : new WebAPI();
 ```
 
@@ -383,20 +383,20 @@ const { Application } = require('spectron');
 
 describe('IconConverter Electron App', () => {
   let app;
-  
+
   beforeEach(async () => {
     app = new Application({
       path: './dist-electron/IconConverter.exe'
     });
     await app.start();
   });
-  
+
   afterEach(async () => {
     if (app && app.isRunning()) {
       await app.stop();
     }
   });
-  
+
   it('should launch successfully', async () => {
     const windowCount = await app.client.getWindowCount();
     expect(windowCount).toBe(1);
@@ -415,7 +415,7 @@ class PerformanceMonitor {
       const start = performance.now();
       const result = await fn(...args);
       const end = performance.now();
-      
+
       console.log(`Conversion took ${end - start} milliseconds`);
       return result;
     };

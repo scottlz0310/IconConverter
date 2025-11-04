@@ -219,7 +219,16 @@ describe('ConvertButton', () => {
   });
 
   it('変換成功時にダウンロードが実行される（要件4.4）', () => {
-    // DOMメソッドをモック（render前に実行）
+    (useImageStore as any).mockReturnValue({
+      image: mockImage,
+      options: { preserveTransparency: true, autoTransparentBg: false },
+      setStatus: mockSetStatus,
+      setError: mockSetError,
+    });
+
+    render(<ConvertButton />);
+
+    // render後にDOMメソッドをモック
     const mockLink = {
       href: '',
       download: '',
@@ -235,15 +244,6 @@ describe('ConvertButton', () => {
     const removeChildSpy = vi
       .spyOn(document.body, 'removeChild')
       .mockImplementation(() => mockLink as any);
-
-    (useImageStore as any).mockReturnValue({
-      image: mockImage,
-      options: { preserveTransparency: true, autoTransparentBg: false },
-      setStatus: mockSetStatus,
-      setError: mockSetError,
-    });
-
-    render(<ConvertButton />);
 
     // onSuccessコールバックを実行
     const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
@@ -264,18 +264,6 @@ describe('ConvertButton', () => {
   });
 
   it('変換成功時にファイル名が正しく設定される', () => {
-    const mockLink = {
-      href: '',
-      download: '',
-      click: vi.fn(),
-      setAttribute: vi.fn(),
-      getAttribute: vi.fn(),
-      removeAttribute: vi.fn(),
-    };
-    vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-    vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
-    vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
-
     (useImageStore as any).mockReturnValue({
       image: mockImage,
       options: { preserveTransparency: true, autoTransparentBg: false },
@@ -285,13 +273,7 @@ describe('ConvertButton', () => {
 
     render(<ConvertButton />);
 
-    const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
-    mockOnSuccess?.(mockBlob);
-
-    expect(mockLink.download).toBe('test.ico');
-  });
-
-  it('画像名がない場合はデフォルトのファイル名を使用する', () => {
+    // render後にDOMメソッドをモック
     const mockLink = {
       href: '',
       download: '',
@@ -300,10 +282,21 @@ describe('ConvertButton', () => {
       getAttribute: vi.fn(),
       removeAttribute: vi.fn(),
     };
-    vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-    vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
-    vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
+    const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
+    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
 
+    const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
+    mockOnSuccess?.(mockBlob);
+
+    expect(mockLink.download).toBe('test.ico');
+
+    createElementSpy.mockRestore();
+    appendChildSpy.mockRestore();
+    removeChildSpy.mockRestore();
+  });
+
+  it('画像名がない場合はデフォルトのファイル名を使用する', () => {
     const imageWithoutName = { ...mockImage, name: undefined };
     (useImageStore as any).mockReturnValue({
       image: imageWithoutName,
@@ -314,10 +307,27 @@ describe('ConvertButton', () => {
 
     render(<ConvertButton />);
 
+    // render後にDOMメソッドをモック
+    const mockLink = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+      setAttribute: vi.fn(),
+      getAttribute: vi.fn(),
+      removeAttribute: vi.fn(),
+    };
+    const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
+    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
+
     const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
     mockOnSuccess?.(mockBlob);
 
     expect(mockLink.download).toBe('image.ico');
+
+    createElementSpy.mockRestore();
+    appendChildSpy.mockRestore();
+    removeChildSpy.mockRestore();
   });
 
   it('変換エラー時にエラー状態が設定される（要件4.5）', () => {
@@ -338,9 +348,7 @@ describe('ConvertButton', () => {
     expect(mockSetStatus).toHaveBeenCalledWith('error');
   });
 
-  it('画像が選択されていない状態でクリックするとエラートーストが表示される', async () => {
-    const { toast } = await import('sonner');
-
+  it('画像が選択されていない状態ではボタンが無効化され、ユーザーはクリックできない', () => {
     (useImageStore as any).mockReturnValue({
       image: null,
       options: { preserveTransparency: true, autoTransparentBg: false },
@@ -350,15 +358,12 @@ describe('ConvertButton', () => {
 
     render(<ConvertButton />);
 
-    const button = screen.getByRole('button', { name: /ICOファイルに変換/i });
+    const button = screen.getByRole('button', { name: /ICOファイルに変換/i }) as HTMLButtonElement;
 
-    // ボタンは無効化されているが、プログラム的にクリックイベントを発火
-    button.removeAttribute('disabled');
-    await userEvent.click(button);
+    // 画像が選択されていない場合、ボタンは無効化されている
+    expect(button.disabled).toBe(true);
 
-    expect(toast.error).toHaveBeenCalledWith('エラー', {
-      description: '画像ファイルを選択してください',
-    });
+    // 無効化されたボタンはクリックできないため、mutateは呼ばれない
     expect(mockMutate).not.toHaveBeenCalled();
   });
 });

@@ -43,13 +43,14 @@ app = FastAPI(
 
 # レート制限をアプリケーションに追加
 app.state.limiter = limiter
-app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)  # type: ignore[arg-type]
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 
 # セキュリティヘッダーミドルウェア
 @app.middleware("http")
 async def security_headers_middleware(
-    request: Request, call_next: Callable[[Request], Awaitable[Response]],
+    request: Request,
+    call_next: Callable[[Request], Awaitable[Response]],
 ) -> Response:
     """セキュリティヘッダーを追加するミドルウェア
 

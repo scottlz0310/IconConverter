@@ -123,7 +123,7 @@ class TestConversionResponse:
             ConversionResponse(
                 filename="test.ico",
                 size_bytes=1024,
-                transparency_mode="invalid",  # type: ignore
+                transparency_mode="invalid",
             )
 
     def test_json_serialization(self):
@@ -163,7 +163,7 @@ class TestHealthResponse:
         """無効なステータスのテスト"""
         with pytest.raises(ValidationError):
             HealthResponse(
-                status="unknown",  # type: ignore
+                status="unknown",
                 version="2.0.0",
             )
 

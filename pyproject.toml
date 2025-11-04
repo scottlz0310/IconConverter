@@ -89,6 +89,10 @@ exclude_lines = [
 show_missing = true
 fail_under = 80  # production段階では80%
 
+[tool.bandit]
+exclude_dirs = ["tests", "backend/tests", "tests-legacy", ".venv", "venv"]
+skips = ["B101"]  # B101: Use of assert detected (テストファイルで必要)
+
 [dependency-groups]
 dev = [
     "pytest>=8.4.1",

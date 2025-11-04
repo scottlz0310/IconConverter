@@ -10,8 +10,6 @@ import {
   validateFileSize,
   MAX_FILE_SIZE,
   parseApiError,
-  convertImage,
-  checkHealth,
 } from '../api';
 import type { ErrorResponse, ConversionOptions } from '../../types';
 
@@ -265,14 +263,15 @@ describe('APIクライアント', () => {
       const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
       const mockPost = vi.fn().mockResolvedValue({ data: mockBlob });
 
-      mockedAxios.create.mockReturnValue({
-        post: mockPost,
-        get: vi.fn(),
-        interceptors: {
-          request: { use: vi.fn(), eject: vi.fn() },
-          response: { use: vi.fn(), eject: vi.fn() },
-        },
-      } as unknown as ReturnType<typeof axios.create>);
+      // 既存のaxiosインスタンスのpostメソッドをモック
+      const mockAxiosInstance = mockedAxios.create();
+      mockAxiosInstance.post = mockPost;
+
+      mockedAxios.create.mockReturnValue(mockAxiosInstance);
+
+      // モジュールを再インポートしてモックを適用
+      vi.resetModules();
+      const { convertImage: freshConvertImage } = await import('../api');
 
       const file = new File(['test'], 'test.png', { type: 'image/png' });
       const options: ConversionOptions = {
@@ -280,7 +279,7 @@ describe('APIクライアント', () => {
         autoTransparentBg: false,
       };
 
-      const result = await convertImage(file, options);
+      const result = await freshConvertImage(file, options);
 
       expect(result).toBe(mockBlob);
       expect(mockPost).toHaveBeenCalledWith(
@@ -305,16 +304,17 @@ describe('APIクライアント', () => {
       };
       const mockGet = vi.fn().mockResolvedValue({ data: mockHealthResponse });
 
-      mockedAxios.create.mockReturnValue({
-        post: vi.fn(),
-        get: mockGet,
-        interceptors: {
-          request: { use: vi.fn(), eject: vi.fn() },
-          response: { use: vi.fn(), eject: vi.fn() },
-        },
-      } as unknown as ReturnType<typeof axios.create>);
+      // 既存のaxiosインスタンスのgetメソッドをモック
+      const mockAxiosInstance = mockedAxios.create();
+      mockAxiosInstance.get = mockGet;
 
-      const result = await checkHealth();
+      mockedAxios.create.mockReturnValue(mockAxiosInstance);
+
+      // モジュールを再インポートしてモックを適用
+      vi.resetModules();
+      const { checkHealth: freshCheckHealth } = await import('../api');
+
+      const result = await freshCheckHealth();
 
       expect(result).toEqual(mockHealthResponse);
       expect(mockGet).toHaveBeenCalledWith('/api/health');
