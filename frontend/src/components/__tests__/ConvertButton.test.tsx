@@ -219,18 +219,14 @@ describe('ConvertButton', () => {
   });
 
   it('変換成功時にダウンロードが実行される（要件4.4）', () => {
-    (useImageStore as any).mockReturnValue({
-      image: mockImage,
-      options: { preserveTransparency: true, autoTransparentBg: false },
-      setStatus: mockSetStatus,
-      setError: mockSetError,
-    });
-
-    // DOMメソッドをモック
+    // DOMメソッドをモック（render前に実行）
     const mockLink = {
       href: '',
       download: '',
       click: vi.fn(),
+      setAttribute: vi.fn(),
+      getAttribute: vi.fn(),
+      removeAttribute: vi.fn(),
     };
     const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
     const appendChildSpy = vi
@@ -239,6 +235,13 @@ describe('ConvertButton', () => {
     const removeChildSpy = vi
       .spyOn(document.body, 'removeChild')
       .mockImplementation(() => mockLink as any);
+
+    (useImageStore as any).mockReturnValue({
+      image: mockImage,
+      options: { preserveTransparency: true, autoTransparentBg: false },
+      setStatus: mockSetStatus,
+      setError: mockSetError,
+    });
 
     render(<ConvertButton />);
 
@@ -261,21 +264,24 @@ describe('ConvertButton', () => {
   });
 
   it('変換成功時にファイル名が正しく設定される', () => {
+    const mockLink = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+      setAttribute: vi.fn(),
+      getAttribute: vi.fn(),
+      removeAttribute: vi.fn(),
+    };
+    vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+    vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
+    vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
+
     (useImageStore as any).mockReturnValue({
       image: mockImage,
       options: { preserveTransparency: true, autoTransparentBg: false },
       setStatus: mockSetStatus,
       setError: mockSetError,
     });
-
-    const mockLink = {
-      href: '',
-      download: '',
-      click: vi.fn(),
-    };
-    vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-    vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
-    vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
 
     render(<ConvertButton />);
 
@@ -286,6 +292,18 @@ describe('ConvertButton', () => {
   });
 
   it('画像名がない場合はデフォルトのファイル名を使用する', () => {
+    const mockLink = {
+      href: '',
+      download: '',
+      click: vi.fn(),
+      setAttribute: vi.fn(),
+      getAttribute: vi.fn(),
+      removeAttribute: vi.fn(),
+    };
+    vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
+    vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
+    vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
+
     const imageWithoutName = { ...mockImage, name: undefined };
     (useImageStore as any).mockReturnValue({
       image: imageWithoutName,
@@ -293,15 +311,6 @@ describe('ConvertButton', () => {
       setStatus: mockSetStatus,
       setError: mockSetError,
     });
-
-    const mockLink = {
-      href: '',
-      download: '',
-      click: vi.fn(),
-    };
-    vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-    vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
-    vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
 
     render(<ConvertButton />);
 

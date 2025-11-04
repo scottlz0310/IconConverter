@@ -65,7 +65,7 @@ export function FileUploader() {
   const onDrop = useCallback(
     (
       acceptedFiles: File[],
-      rejectedFiles: { file: File; errors: { code: string; message: string }[] }[]
+      rejectedFiles: { file: File; errors: readonly { code: string; message: string }[] }[]
     ) => {
       // エラーをクリア
       setError(null);

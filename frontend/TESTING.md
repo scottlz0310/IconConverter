@@ -158,6 +158,21 @@ pnpm test:e2e --project=webkit
 2. 開発サーバーが起動しているか確認
 3. `pnpm test:e2e:headed` でブラウザを表示して確認
 4. `pnpm test:e2e:debug` でデバッグモードで実行
+5. トレースを確認: `pnpm test:e2e:report`
+
+詳細なトラブルシューティングは [TEST_STABILITY.md](../TEST_STABILITY.md) を参照してください。
+
+## テスト安定化対策
+
+以下の対策により、テストの安定性が向上しています:
+
+- 並列実行の無効化
+- タイムアウトの延長
+- 明示的な待機処理
+- 柔軟なセレクタ
+- リトライ機能
+
+詳細は [TEST_STABILITY.md](../TEST_STABILITY.md) を参照してください。
 
 ## 今後の改善
 
@@ -165,3 +180,4 @@ pnpm test:e2e --project=webkit
 - [ ] ビジュアルリグレッションテストの追加
 - [ ] パフォーマンステストの追加
 - [ ] アクセシビリティ自動テスト（axe-core）の統合
+- [ ] E2Eテスト成功率95%以上を維持

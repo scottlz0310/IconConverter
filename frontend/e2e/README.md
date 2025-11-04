@@ -1,65 +1,147 @@
-# E2Eテスト
+# E2Eテストガイド
 
-Playwrightを使用したエンドツーエンドテストです。
+## テストの安定化対策
 
-## テストの実行
+このディレクトリのE2Eテストは、以下の安定化対策を実装しています。
 
-### すべてのテストを実行
+### 1. Playwright設定の最適化
+
+- **並列実行無効化**: `fullyParallel: false` - テスト間の競合を防止
+- **ワーカー数制限**: `workers: 1` - リソース競合を回避
+- **タイムアウト延長**:
+  - テスト全体: 30秒
+  - expect: 10秒
+  - アクション: 10秒
+  - ナビゲーション: 30秒
+- **リトライ設定**: CI環境で2回、ローカルで1回
+- **トレース/ビデオ保持**: 失敗時のデバッグ用
+
+### 2. テストコードの改善
+
+- **明示的な待機**: `waitForLoadState('networkidle')` でページ読み込み完了を確認
+- **タイムアウト指定**: 全ての`expect`に`timeout: 10000`を指定
+- **待機処理追加**: 状態変更後に`waitForTimeout`で安定化
+- **柔軟なセレクタ**: 複数パターンのテキストマッチング
+- **force click**: 必要に応じて`{ force: true }`オプション使用
+
+### 3. テストフィクスチャ
+
+- **自動生成**: テスト実行前に必要な画像ファイルを自動生成
+- **Base64エンコード**: 最小限のPNG画像データを使用
+- **ディレクトリ作成**: `fixtures/`ディレクトリを自動作成
+
+## テスト実行方法
 
 ```bash
+# 全ブラウザでテスト実行
 pnpm test:e2e
-```
 
-### UIモードで実行
+# Chromiumのみ（CI用）
+pnpm test:e2e:ci
 
-```bash
+# UIモード（推奨）
 pnpm test:e2e:ui
-```
 
-### ヘッドモードで実行（ブラウザを表示）
-
-```bash
+# ヘッドモード（ブラウザ表示）
 pnpm test:e2e:headed
-```
 
-### デバッグモード
-
-```bash
+# デバッグモード
 pnpm test:e2e:debug
+
+# 特定のテストファイルのみ
+pnpm exec playwright test conversion-flow.spec.ts
+
+# 特定のテストケースのみ
+pnpm exec playwright test -g "ページが正しく読み込まれる"
 ```
 
-### 特定のブラウザでテスト
+## トラブルシューティング
 
-```bash
-pnpm test:e2e --project=chromium
-pnpm test:e2e --project=firefox
-pnpm test:e2e --project=webkit
+### テストが失敗する場合
+
+1. **開発サーバーが起動しているか確認**
+   ```bash
+   # 別ターミナルで
+   cd frontend
+   pnpm dev
+   ```
+
+2. **ブラウザをインストール**
+   ```bash
+   pnpm exec playwright install
+   ```
+
+3. **ヘッドモードで確認**
+   ```bash
+   pnpm test:e2e:headed
+   ```
+
+4. **トレースを確認**
+   ```bash
+   # テスト実行後
+   pnpm exec playwright show-trace test-results/.../trace.zip
+   ```
+
+5. **スクリーンショットを確認**
+   - `test-results/`ディレクトリ内のスクリーンショットを確認
+
+### タイムアウトエラーが発生する場合
+
+- ネットワークが遅い環境では、`playwright.config.ts`のタイムアウトを延長
+- `waitForTimeout`の値を増やす（ただし最小限に）
+
+### セレクタが見つからない場合
+
+- UIモードでセレクタを確認: `pnpm test:e2e:ui`
+- Playwright Inspectorを使用: `pnpm test:e2e:debug`
+
+## ベストプラクティス
+
+1. **明示的な待機を使用**
+   - `page.waitForLoadState('networkidle')`
+   - `page.waitForSelector()`
+   - `expect().toBeVisible({ timeout: 10000 })`
+
+2. **暗黙的な待機を避ける**
+   - `page.waitForTimeout()`は最小限に
+   - 代わりに状態ベースの待機を使用
+
+3. **柔軟なセレクタ**
+   - 正規表現を使用: `/テキスト/i`
+   - 複数パターン: `/パターン1|パターン2/i`
+   - `.first()`で最初の要素を取得
+
+4. **テストの独立性**
+   - 各テストは独立して実行可能
+   - `beforeEach`で初期状態にリセット
+
+5. **デバッグ情報**
+   - スクリーンショット、トレース、ビデオを活用
+   - `test.step()`でテストステップを明示
+
+## CI/CD統合
+
+GitHub Actionsでは以下の設定を使用:
+
+```yaml
+- name: Install Playwright
+  run: pnpm exec playwright install --with-deps chromium
+
+- name: Run E2E tests
+  run: pnpm test:e2e:ci
+  env:
+    CI: true
+
+- name: Upload test results
+  if: failure()
+  uses: actions/upload-artifact@v3
+  with:
+    name: playwright-report
+    path: frontend/playwright-report/
 ```
 
-## テストファイル
+## 参考資料
 
-- `conversion-flow.spec.ts`: 完全な変換フローのテスト
-- `ui-interactions.spec.ts`: UIインタラクションのテスト
-
-## 前提条件
-
-- フロントエンド開発サーバーが起動している（`pnpm dev`）
-- バックエンドサーバーが起動している（完全な変換フローのテストの場合）
-
-## テストフィクスチャ
-
-テスト用の画像ファイルは `e2e/fixtures/` ディレクトリに自動生成されます。
-
-## クロスブラウザテスト
-
-以下のブラウザでテストが実行されます：
-
-- Chromium (Chrome/Edge)
-- Firefox
-- WebKit (Safari)
-- Mobile Chrome (Pixel 5)
-- Mobile Safari (iPhone 12)
-
-## CI/CD
-
-CI環境では、すべてのブラウザでテストが実行され、失敗時にはスクリーンショットとトレースが保存されます。
+- [Playwright公式ドキュメント](https://playwright.dev/)
+- [Best Practices](https://playwright.dev/docs/best-practices)
+- [Debugging Tests](https://playwright.dev/docs/debug)

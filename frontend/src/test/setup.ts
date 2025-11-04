@@ -45,9 +45,26 @@ Object.defineProperty(window, 'matchMedia', {
   })),
 });
 
+// URL.createObjectURLのモック
+global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+global.URL.revokeObjectURL = vi.fn();
+
+// Blobのモック
+if (!global.Blob) {
+  global.Blob = class Blob {
+    constructor(parts: any[], options?: any) {
+      this.size = 0;
+      this.type = options?.type || '';
+    }
+    size: number;
+    type: string;
+  } as any;
+}
+
 // 各テスト前にlocalStorageをクリア
 beforeEach(() => {
   localStorageMock.clear();
+  vi.clearAllMocks();
 });
 
 // 各テスト後にクリーンアップ

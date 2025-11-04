@@ -40,6 +40,9 @@ htmlcov/
 .tox/
 .nox/
 nosetests.xml
+test-results.txt
+backend/htmlcov/
+backend/.coverage
 
 # Type checking and linting
 .mypy_cache/
