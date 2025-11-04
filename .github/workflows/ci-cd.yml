@@ -60,6 +60,7 @@ jobs:
 
       - name: Install dependencies (Windows/Linux)
         if: runner.os != 'macOS'
+        shell: bash
         run: |
           if [ -f "pyproject.toml" ]; then
             uv sync --all-extras || uv sync
