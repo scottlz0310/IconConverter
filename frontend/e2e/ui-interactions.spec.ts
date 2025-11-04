@@ -16,16 +16,22 @@ const TEST_IMAGE_PATH = path.join(__dirname, 'fixtures', 'test-image.png');
 
 test.describe('UI インタラクション', () => {
   test.beforeAll(async () => {
-    // テスト用の画像ファイルを作成
     const fixturesDir = path.join(__dirname, 'fixtures');
     if (!fs.existsSync(fixturesDir)) {
       fs.mkdirSync(fixturesDir, { recursive: true });
     }
 
-    // 簡単なPNG画像を作成（1x1ピクセルの赤い画像）
     if (!fs.existsSync(TEST_IMAGE_PATH)) {
+      // 100x100の赤いPNG画像
       const pngData = Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8DwHwAFBQIAX8jx0gAAAABJRU5ErkJggg==',
+        'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAA' +
+        'AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZ' +
+        'cwAADsMAAA7DAcdvqGQAAABfSURBVHhe7dAxAQAADMOg+Tfd' +
+        'SXYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
+        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAw' +
+        'BgAAAP//AwBkpwAB8QAAAABJRU5ErkJggg==',
         'base64'
       );
       fs.writeFileSync(TEST_IMAGE_PATH, pngData);
@@ -61,29 +67,34 @@ test.describe('UI インタラクション', () => {
   });
 
   test('変換オプションが表示され操作できる', async ({ page }) => {
-    // オプションが表示される
-    await expect(page.getByText('変換オプション')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByLabel('透明化保持')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByLabel('自動背景透明化')).toBeVisible({ timeout: 10000 });
+    // ファイルをアップロード（オプションは画像アップロード後に表示される）
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles(TEST_IMAGE_PATH);
+    await page.waitForTimeout(1000);
+
+    // オプションのチェックボックスが表示される
+    const preserveCheckbox = page.locator('#preserve-transparency');
+    const autoCheckbox = page.locator('#auto-transparent-bg');
+
+    await expect(preserveCheckbox).toBeVisible({ timeout: 10000 });
+    await expect(autoCheckbox).toBeVisible({ timeout: 10000 });
 
     // デフォルトで透明化保持が選択されている
-    await expect(page.getByLabel('透明化保持')).toBeChecked();
-    await expect(page.getByLabel('自動背景透明化')).not.toBeChecked();
+    await expect(preserveCheckbox).toBeChecked();
+    await expect(autoCheckbox).not.toBeChecked();
   });
 
   test('変換ボタンの状態が正しく変化する', async ({ page }) => {
-    const convertButton = page.getByRole('button', { name: /ICOファイルに変換/i });
-
-    // 初期状態では無効
-    await expect(convertButton).toBeVisible({ timeout: 10000 });
-    await expect(convertButton).toBeDisabled();
-
-    // ファイルをアップロード
+    // ファイルをアップロード（変換ボタンは画像アップロード後に表示される）
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(TEST_IMAGE_PATH);
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
-    // 有効になる
+    // 変換ボタンをaria-labelで検索
+    const convertButton = page.getByRole('button', { name: /ICOファイルに変換/ });
+
+    // 画像アップロード後、ボタンが表示され有効になる
+    await expect(convertButton).toBeVisible({ timeout: 10000 });
     await expect(convertButton).toBeEnabled({ timeout: 10000 });
   });
 
