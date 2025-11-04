@@ -7,7 +7,6 @@
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // テスト用の画像ファイルパス
@@ -16,29 +15,6 @@ const __dirname = path.dirname(__filename);
 const TEST_IMAGE_PATH = path.join(__dirname, 'fixtures', 'test-image.png');
 
 test.describe('画像変換フロー', () => {
-  test.beforeAll(async () => {
-    const fixturesDir = path.join(__dirname, 'fixtures');
-    if (!fs.existsSync(fixturesDir)) {
-      fs.mkdirSync(fixturesDir, { recursive: true });
-    }
-
-    if (!fs.existsSync(TEST_IMAGE_PATH)) {
-      // 100x100の赤いPNG画像
-      const pngData = Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAA' +
-        'AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZ' +
-        'cwAADsMAAA7DAcdvqGQAAABfSURBVHhe7dAxAQAADMOg+Tfd' +
-        'SXYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAw' +
-        'BgAAAP//AwBkpwAB8QAAAABJRU5ErkJggg==',
-        'base64'
-      );
-      fs.writeFileSync(TEST_IMAGE_PATH, pngData);
-    }
-  });
-
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForLoadState('domcontentloaded');
@@ -116,7 +92,9 @@ test.describe('画像変換フロー', () => {
     await page.waitForTimeout(300);
 
     // ファイルアップロードエリアまたは最初のフォーカス可能な要素を確認
-    const dropzone = page.getByRole('button', { name: /画像ファイルをアップロード|ファイルを選択/i }).first();
+    const dropzone = page
+      .getByRole('button', { name: /画像ファイルをアップロード|ファイルを選択/i })
+      .first();
     await expect(dropzone).toBeVisible({ timeout: 10000 });
   });
 
@@ -173,16 +151,15 @@ test.describe('画像変換フロー', () => {
   test('エラーメッセージが表示される（要件4.5）', async ({ page }) => {
     // サポートされていない形式のファイルをアップロード
     const invalidFile = path.join(__dirname, 'fixtures', 'test.txt');
-    if (!fs.existsSync(invalidFile)) {
-      fs.writeFileSync(invalidFile, 'This is a text file');
-    }
 
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles(invalidFile);
     await page.waitForTimeout(1000);
 
     // エラートーストまたはエラーメッセージが表示される
-    const errorMessage = page.getByText(/対応していないファイル形式|サポートされていない|無効なファイル|エラー/i).first();
+    const errorMessage = page
+      .getByText(/対応していないファイル形式|サポートされていない|無効なファイル|エラー/i)
+      .first();
     await expect(errorMessage).toBeVisible({ timeout: 10000 });
   });
 });
@@ -198,7 +175,9 @@ test.describe('アクセシビリティ', () => {
     await page.waitForLoadState('networkidle');
 
     // ファイルアップロードエリアまたはボタン
-    const dropzone = page.getByRole('button', { name: /画像ファイルをアップロード|ファイルを選択/i }).first();
+    const dropzone = page
+      .getByRole('button', { name: /画像ファイルをアップロード|ファイルを選択/i })
+      .first();
     await expect(dropzone).toBeVisible({ timeout: 10000 });
 
     // ファイル入力

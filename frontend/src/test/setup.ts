@@ -52,13 +52,13 @@ global.URL.revokeObjectURL = vi.fn();
 // Blobのモック
 if (!global.Blob) {
   global.Blob = class Blob {
-    constructor(parts: any[], options?: any) {
+    constructor(parts: BlobPart[], options?: { type?: string }) {
       this.size = 0;
       this.type = options?.type || '';
     }
     size: number;
     type: string;
-  } as any;
+  } as unknown as typeof Blob;
 }
 
 // 各テスト前にlocalStorageをクリア

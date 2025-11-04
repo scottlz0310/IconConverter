@@ -71,22 +71,19 @@ jobs:
 
       - name: Test with pytest
         run: |
-          # Detect package name from pyproject.toml
-          if [ -f "pyproject.toml" ]; then
-            PACKAGE_NAME=$(uv run python -c "import tomllib; f=open('pyproject.toml','rb'); data=tomllib.load(f); name=data.get('project',{}).get('name',''); print(name.replace('-','_') if name else 'src')" 2>/dev/null || echo "src")
-            # Run tests with detected package
-            if [ -d "tests" ]; then
-              uv run pytest tests/ --cov="iconconverter" --cov-report=xml --cov-report=term-missing
-            else
-              uv run pytest --cov="iconconverter" --cov-report=xml --cov-report=term-missing
-            fi
+          # Run backend tests if they exist
+          if [ -d "backend/tests" ]; then
+            cd backend
+            uv run pytest tests/ --cov=. --cov-report=xml --cov-report=term-missing
+            # Move coverage report to root for upload
+            mv coverage.xml ../coverage.xml
+            cd ..
+          elif [ -d "tests" ] && [ -n "$(ls -A tests/*.py 2>/dev/null)" ]; then
+            # Run tests from root if tests/ has Python files
+            uv run pytest tests/ --cov=iconconverter --cov-report=xml --cov-report=term-missing
           else
-            # Fallback for projects without pyproject.toml
-            if [ -d "tests" ]; then
-              uv run pytest tests/ --cov-report=xml --cov-report=term-missing
-            else
-              uv run pytest --cov-report=xml --cov-report=term-missing
-            fi
+            echo "No tests found, skipping pytest"
+            exit 0
           fi
 
       - name: Upload coverage reports to Codecov
@@ -132,7 +129,9 @@ jobs:
 
       - name: Run pre-commit hooks
         run: |
-          pre-commit run --all-files
+          # Ensure pre-commit uses the correct Python
+          export PATH="$UV_PYTHON_INSTALL_DIR:$PATH"
+          uv run pre-commit run --all-files
 
   docs:
     runs-on: ubuntu-latest
@@ -162,10 +161,10 @@ jobs:
               uv sync --group docs
             else
               # Fallback to basic sphinx installation
-              uv pip install --system sphinx sphinx-rtd-theme
+              uv pip install sphinx sphinx-rtd-theme
             fi
           else
-            uv pip install --system sphinx sphinx-rtd-theme
+            uv pip install sphinx sphinx-rtd-theme
           fi
 
       - name: Build documentation

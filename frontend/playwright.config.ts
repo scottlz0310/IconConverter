@@ -22,6 +22,7 @@ export default defineConfig({
   expect: {
     timeout: 15000,
   },
+  globalSetup: './e2e/global-setup.ts',
   use: {
     baseURL: 'http://localhost:5173',
     trace: 'retain-on-failure',
@@ -38,24 +39,26 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'] },
     },
     // CI以外では全ブラウザテスト、CIではChromiumのみ
-    ...(!process.env.CI ? [
-      {
-        name: 'firefox',
-        use: { ...devices['Desktop Firefox'] },
-      },
-      {
-        name: 'webkit',
-        use: { ...devices['Desktop Safari'] },
-      },
-      {
-        name: 'Mobile Chrome',
-        use: { ...devices['Pixel 5'] },
-      },
-      {
-        name: 'Mobile Safari',
-        use: { ...devices['iPhone 12'] },
-      },
-    ] : []),
+    ...(!process.env.CI
+      ? [
+          {
+            name: 'firefox',
+            use: { ...devices['Desktop Firefox'] },
+          },
+          {
+            name: 'webkit',
+            use: { ...devices['Desktop Safari'] },
+          },
+          {
+            name: 'Mobile Chrome',
+            use: { ...devices['Pixel 5'] },
+          },
+          {
+            name: 'Mobile Safari',
+            use: { ...devices['iPhone 12'] },
+          },
+        ]
+      : []),
   ],
 
   // 開発サーバーの起動

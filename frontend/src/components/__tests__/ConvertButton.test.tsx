@@ -283,8 +283,12 @@ describe('ConvertButton', () => {
       removeAttribute: vi.fn(),
     };
     const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
-    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
+    const appendChildSpy = vi
+      .spyOn(document.body, 'appendChild')
+      .mockImplementation(() => mockLink as any);
+    const removeChildSpy = vi
+      .spyOn(document.body, 'removeChild')
+      .mockImplementation(() => mockLink as any);
 
     const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
     mockOnSuccess?.(mockBlob);
@@ -317,8 +321,12 @@ describe('ConvertButton', () => {
       removeAttribute: vi.fn(),
     };
     const createElementSpy = vi.spyOn(document, 'createElement').mockReturnValue(mockLink as any);
-    const appendChildSpy = vi.spyOn(document.body, 'appendChild').mockImplementation(() => mockLink as any);
-    const removeChildSpy = vi.spyOn(document.body, 'removeChild').mockImplementation(() => mockLink as any);
+    const appendChildSpy = vi
+      .spyOn(document.body, 'appendChild')
+      .mockImplementation(() => mockLink as any);
+    const removeChildSpy = vi
+      .spyOn(document.body, 'removeChild')
+      .mockImplementation(() => mockLink as any);
 
     const mockBlob = new Blob(['ico data'], { type: 'image/x-icon' });
     mockOnSuccess?.(mockBlob);

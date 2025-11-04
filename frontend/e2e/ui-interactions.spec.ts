@@ -6,7 +6,6 @@
 
 import { test, expect } from '@playwright/test';
 import path from 'path';
-import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 // テスト用の画像ファイルパス
@@ -15,29 +14,6 @@ const __dirname = path.dirname(__filename);
 const TEST_IMAGE_PATH = path.join(__dirname, 'fixtures', 'test-image.png');
 
 test.describe('UI インタラクション', () => {
-  test.beforeAll(async () => {
-    const fixturesDir = path.join(__dirname, 'fixtures');
-    if (!fs.existsSync(fixturesDir)) {
-      fs.mkdirSync(fixturesDir, { recursive: true });
-    }
-
-    if (!fs.existsSync(TEST_IMAGE_PATH)) {
-      // 100x100の赤いPNG画像
-      const pngData = Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAGQAAABkCAYAAABw4pVUAAAA' +
-        'AAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAJcEhZ' +
-        'cwAADsMAAA7DAcdvqGQAAABfSURBVHhe7dAxAQAADMOg+Tfd' +
-        'SXYQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA' +
-        'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAw' +
-        'BgAAAP//AwBkpwAB8QAAAABJRU5ErkJggg==',
-        'base64'
-      );
-      fs.writeFileSync(TEST_IMAGE_PATH, pngData);
-    }
-  });
-
   test.beforeEach(async ({ page }) => {
     await page.goto('/', { waitUntil: 'networkidle' });
     await page.waitForLoadState('domcontentloaded');
@@ -49,7 +25,9 @@ test.describe('UI インタラクション', () => {
 
     // メインコンテンツが表示される
     await expect(page.getByText('画像ファイルをドラッグ&ドロップ')).toBeVisible({ timeout: 10000 });
-    await expect(page.getByRole('button', { name: /ファイルを選択/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /ファイルを選択/i })).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test('ファイルアップロードUIが機能する', async ({ page }) => {
