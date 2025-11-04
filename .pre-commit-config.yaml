@@ -6,8 +6,10 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.14.3
     hooks:
+      # Full linting with auto-fix
       - id: ruff
         args: [--fix, --exit-non-zero-on-fix]
+      # Format check
       - id: ruff-format
 
   # Basic file checks
@@ -123,6 +125,17 @@ repos:
               frontend/coverage/.*
           )
         pass_filenames: true
+
+  # Frontend TypeScript type checking
+  - repo: local
+    hooks:
+      - id: tsc
+        name: tsc (TypeScript type check)
+        entry: bash -c 'cd frontend && pnpm exec tsc --noEmit'
+        language: system
+        types_or: [ts, tsx]
+        files: ^frontend/.*\.(ts|tsx)$
+        pass_filenames: false
 
   # Frontend and YAML formatting with Prettier
   - repo: https://github.com/pre-commit/mirrors-prettier
