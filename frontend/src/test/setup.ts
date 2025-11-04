@@ -46,12 +46,16 @@ Object.defineProperty(window, 'matchMedia', {
 });
 
 // URL.createObjectURLのモック
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url');
-global.URL.revokeObjectURL = vi.fn();
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).URL.createObjectURL = vi.fn(() => 'blob:mock-url');
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+(global as any).URL.revokeObjectURL = vi.fn();
 
 // Blobのモック
-if (!global.Blob) {
-  global.Blob = class Blob {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+if (!(global as any).Blob) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (global as any).Blob = class Blob {
     constructor(parts: BlobPart[], options?: { type?: string }) {
       this.size = 0;
       this.type = options?.type || '';
