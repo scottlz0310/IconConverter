@@ -56,7 +56,7 @@ Object.defineProperty(window, 'matchMedia', {
 if (!(global as any).Blob) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).Blob = class Blob {
-    constructor(parts: BlobPart[], options?: { type?: string }) {
+    constructor(_parts: BlobPart[], options?: { type?: string }) {
       this.size = 0;
       this.type = options?.type || '';
     }
