@@ -58,7 +58,6 @@ ignore = []
 "tests/*" = ["T20"]  # テストではprint許可
 
 [tool.mypy]
-python_version = "3.14"
 warn_unused_ignores = true
 warn_redundant_casts = true
 no_implicit_optional = true

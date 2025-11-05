@@ -80,7 +80,7 @@ jobs:
       - name: Type check with mypy
         run: |
           cd backend
-          uv run mypy . --show-error-codes --show-error-context
+          uv run mypy . --show-error-codes --show-error-context --python-version=${{ matrix.python-version }}
 
       - name: Test with pytest (Linux)
         if: runner.os == 'Linux'
