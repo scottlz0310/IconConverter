@@ -249,6 +249,12 @@ jobs:
     steps:
       - uses: actions/checkout@v5
 
+      - name: Download build artifacts
+        uses: actions/download-artifact@v6
+        with:
+          name: dist
+          path: dist/
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
