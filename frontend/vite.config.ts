@@ -6,6 +6,9 @@ import path from 'path';
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  // Electron用ビルド設定（要件7.1, 9.1）
+  // 相対パスを使用してElectronで正しく読み込めるようにする
+  base: './',
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
@@ -20,6 +23,7 @@ export default defineConfig({
     },
   },
   build: {
+    outDir: 'dist',
     // パフォーマンス最適化設定
     target: 'es2020',
     minify: 'esbuild', // esbuildの方が高速
@@ -47,5 +51,9 @@ export default defineConfig({
     },
     // チャンクサイズ警告の閾値を調整
     chunkSizeWarningLimit: 1000,
+  },
+  // Electron環境の定義
+  define: {
+    'process.env.ELECTRON': JSON.stringify(true),
   },
 });

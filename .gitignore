@@ -126,6 +126,20 @@ frontend/out/
 backend/dist/
 backend/build/
 
+# Electron
+dist-electron/
+out/
+*.asar
+*.dmg
+*.pkg
+*.deb
+*.rpm
+*.AppImage
+*.exe
+*.msi
+electron/node_modules/
+.electron-builder.yml
+
 # Auto-generated entries from templates
 *$py.class
 **/*.rs.bk

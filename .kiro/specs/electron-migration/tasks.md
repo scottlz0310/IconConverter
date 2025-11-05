@@ -10,23 +10,23 @@ WebUI版IconConverterのElectronデスクトップアプリケーション化を
 
 ## フェーズ1: 基盤構築
 
-- [ ] 1. Electron環境構築
+- [x] 1. Electron環境構築
 
-- [ ] 1.1 Electronプロジェクトの初期化
+- [x] 1.1 Electronプロジェクトの初期化
 - ルートディレクトリにpackage.jsonを作成
 - Electron v32以降、electron-builder、concurrentlyの依存関係追加
 - Node.js v20 LTS対応の設定
 - 開発・ビルド・パッケージング用のscripts設定
 - _要件: 8.1, 8.2, 10.1_
 
-- [ ] 1.2 基本的なElectronアプリケーション構造の作成
+- [x] 1.2 基本的なElectronアプリケーション構造の作成
 - electron/main.jsの作成（メインプロセス、セキュリティ設定含む）
 - electron/preload.jsの作成（contextBridge使用）
 - セキュアなウィンドウ作成（nodeIntegration: false, contextIsolation: true）
 - 最小限のシステム権限での実行設定
 - _要件: 6.2, 8.4_
 
-- [ ] 1.3 フロントエンドのElectron対応
+- [x] 1.3 フロントエンドのElectron対応
 - vite.config.tsでElectron用ビルド設定（base: './'）
 - 開発環境でのElectron + Viteの統合
 - 既存React UIコンポーネントの動作確認
