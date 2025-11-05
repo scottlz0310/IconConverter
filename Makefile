@@ -1,4 +1,4 @@
-.PHONY: bootstrap bootstrap-backend bootstrap-frontend bootstrap-full lint format typecheck test cov security build clean dev up down logs restart ps backend-test frontend-test test-all backend-lint frontend-lint lint-all backend-format frontend-format format-all help
+.PHONY: bootstrap bootstrap-backend bootstrap-frontend bootstrap-full lint format typecheck test cov security build clean dev up down logs restart ps prod prod-down backend-test frontend-test test-all backend-lint frontend-lint lint-all backend-format frontend-format format-all help
 
 # Bootstrap コマンド
 bootstrap: bootstrap-backend
@@ -68,6 +68,10 @@ build:
 prod:
 	docker-compose -f docker-compose.prod.yml up
 
+# 本番環境停止・削除
+prod-down:
+	docker-compose -f docker-compose.prod.yml down
+
 # バックエンドテスト実行
 backend-test:
 	cd backend && uv run pytest
@@ -125,6 +129,7 @@ help:
 	@echo "  make ps            - コンテナ状態確認"
 	@echo "  make build         - 本番ビルド"
 	@echo "  make prod          - 本番環境起動"
+	@echo "  make prod-down     - 本番環境停止・削除"
 	@echo ""
 	@echo "テストコマンド:"
 	@echo "  make backend-test  - バックエンドテスト実行"
