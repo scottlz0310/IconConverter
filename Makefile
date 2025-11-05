@@ -1,10 +1,20 @@
-.PHONY: bootstrap lint format typecheck test cov security build clean dev up down logs restart ps build-prod backend-test frontend-test
+.PHONY: bootstrap bootstrap-backend bootstrap-frontend bootstrap-full lint format typecheck test cov security build clean dev up down logs restart ps backend-test frontend-test test-all backend-lint frontend-lint lint-all backend-format frontend-format format-all help
 
-# 既存のコマンド（デスクトップアプリ用）
-bootstrap:
+# Bootstrap コマンド
+bootstrap: bootstrap-backend
+	@echo "✓ Backend development environment setup complete"
+
+bootstrap-backend:
 	uv venv --python 3.13
 	uv sync
 	uv run pre-commit install
+
+bootstrap-frontend:
+	cd frontend && pnpm install
+
+bootstrap-full: bootstrap-backend bootstrap-frontend
+	@echo ""
+	@echo "✓ Full development environment setup complete (backend + frontend)"
 
 lint:
 	uv run ruff check .
@@ -100,6 +110,12 @@ clean:
 
 # ヘルプ表示
 help:
+	@echo "Bootstrap コマンド:"
+	@echo "  make bootstrap          - バックエンド開発環境セットアップ"
+	@echo "  make bootstrap-backend  - バックエンドのみセットアップ"
+	@echo "  make bootstrap-frontend - フロントエンドのみセットアップ"
+	@echo "  make bootstrap-full     - フロント + バック両方セットアップ"
+	@echo ""
 	@echo "WebUI開発コマンド:"
 	@echo "  make dev           - 開発環境起動（フォアグラウンド）"
 	@echo "  make up            - 開発環境起動（バックグラウンド）"
