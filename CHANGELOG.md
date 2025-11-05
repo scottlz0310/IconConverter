@@ -1,5 +1,27 @@
 # CHANGELOG
 
+## [v1.5.0] - 2025-11-05
+### Added
+- Flexible bootstrap targets for customized development environment setup
+  - `make bootstrap-backend`: Backend-only setup
+  - `make bootstrap-frontend`: Frontend-only setup
+  - `make bootstrap-full`: Complete frontend + backend setup
+- Enhanced Makefile documentation with `prod-down` target
+
+### Fixed
+- Stabilized CI/CD pipeline across all platforms (Ubuntu, Windows, macOS)
+  - Fixed mypy type checking with runtime Python version detection
+  - Fixed pytest test discovery in CI pipeline
+  - Fixed coverage measurement configuration (94% backend coverage achieved)
+  - Improved Docker build consistency with unified context handling
+- Resolved type incompatibilities with slowapi rate limit exception handler
+
+### Technical
+- Updated CI/CD workflow to support Python 3.12, 3.13, and 3.14
+- Unified Docker build contexts across development and production environments
+- Enhanced coverage configuration for accurate metrics collection
+- Added proper healthcheck configuration for backend service
+
 ## [v1.4.1] - 2025-11-05
 ### Fixed
 - Makefile: improve bootstrap command structure for better developer experience
