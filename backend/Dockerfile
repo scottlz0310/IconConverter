@@ -19,8 +19,6 @@ RUN apt-get update && \
 COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
 
 # 依存関係ファイルのコピー（README.mdも必要）
-# CI では context=. で実行されるので、backend/ プレフィックスが必要
-# ローカル docker build では context=./backend で実行されるので不要
 COPY backend/pyproject.toml backend/uv.lock* README.md ./
 
 # 依存関係のインストール（本番環境用、開発依存関係は除外）

@@ -4,8 +4,8 @@ services:
   # バックエンドサービス（FastAPI - 本番環境）
   backend:
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./backend/Dockerfile
     container_name: iconconverter-backend-prod
     restart: unless-stopped
     ports:
