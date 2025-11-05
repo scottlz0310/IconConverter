@@ -84,11 +84,15 @@ jobs:
 
       - name: Test with pytest (Linux)
         if: runner.os == 'Linux'
-        run: xvfb-run -a uv run pytest --cov=icon_converter --cov-report=xml --cov-report=term-missing
+        run: |
+          cd backend
+          xvfb-run -a uv run pytest --cov=iconconverter_backend --cov-report=xml --cov-report=term-missing
 
       - name: Test with pytest (Windows/macOS)
         if: runner.os != 'Linux'
-        run: uv run pytest --cov=icon_converter --cov-report=xml --cov-report=term-missing
+        run: |
+          cd backend
+          uv run pytest --cov=iconconverter_backend --cov-report=xml --cov-report=term-missing
 
       - name: Upload coverage to Codecov
         if: matrix.python-version == '3.13' && matrix.os == 'ubuntu-latest'
