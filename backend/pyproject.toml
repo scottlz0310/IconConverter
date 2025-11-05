@@ -86,7 +86,7 @@ markers = [
 asyncio_mode = "auto"
 
 [tool.coverage.run]
-source = ["."]
+source = ["backend", "core", "routers", "services"]
 omit = ["tests/*", ".venv/*", "__pycache__/*"]
 
 [tool.coverage.report]
