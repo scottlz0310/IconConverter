@@ -1,5 +1,15 @@
 # CHANGELOG
 
+## [v1.4.1] - 2025-11-05
+### Fixed
+- Makefile: improve bootstrap command structure for better developer experience
+  - Split bootstrap into backend, frontend, and full setup targets
+  - Allows developers to install only what they need based on their role
+  - Improves .PHONY declaration to include all targets
+
+### Technical
+- Update pre-commit configuration to use Python 3.14 for better compatibility
+
 ## [v1.4.0] - 2025-10-12
 ### Fixed
 - Windows環境でのテスト失敗問題を修正

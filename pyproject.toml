@@ -1,6 +1,6 @@
 [project]
 name = "iconconverter"
-version = "1.4.0"
+version = "1.4.1"
 description = "Image to ICO converter with transparency support"
 readme = "README.md"
 requires-python = ">=3.11"
