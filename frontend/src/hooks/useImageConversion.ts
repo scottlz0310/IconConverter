@@ -2,11 +2,12 @@
  * 画像変換カスタムフック
  *
  * TanStack Queryを使用して画像変換処理を管理します。
+ * 要件9.1, 9.4: ElectronとWeb環境の両方で動作する抽象化レイヤー
  */
 
 import { useMutation } from '@tanstack/react-query';
 import type { UseMutationResult } from '@tanstack/react-query';
-import { convertImage, parseApiError } from '../services/api';
+import { imageAPI } from '../adapters/image-api';
 import type { ConversionOptions } from '../types';
 
 /**
@@ -65,11 +66,12 @@ export function useImageConversion(options?: {
   return useMutation<Blob, string, ConvertImageParams>({
     mutationFn: async ({ file, options: conversionOptions }: ConvertImageParams) => {
       try {
-        const blob = await convertImage(file, conversionOptions);
+        // 環境に応じたAPI（ElectronまたはWeb）を使用
+        const blob = await imageAPI.convertImage(file, conversionOptions);
         return blob;
       } catch (error) {
-        // エラーを解析してユーザーフレンドリーなメッセージに変換
-        const errorMessage = parseApiError(error);
+        // エラーメッセージを文字列として返す
+        const errorMessage = error instanceof Error ? error.message : String(error);
         throw errorMessage;
       }
     },

@@ -8,10 +8,11 @@
  * - 10.5: 画像プレビューの最適化（メモリ効率）
  */
 
-import { useEffect, useRef } from 'react';
-import { X } from 'lucide-react';
+import { useEffect, useRef, useMemo } from 'react';
+import { X, FolderOpen } from 'lucide-react';
 import { toast } from 'sonner';
 import { useImageStore } from '../stores/imageStore';
+import { isElectron } from '../utils/electron';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 
@@ -71,6 +72,19 @@ export function ImagePreview() {
       });
     }
   }, [image?.preview]);
+
+  /**
+   * Electron環境でファイルパスを取得
+   * 要件2.4: ファイルパス表示機能の追加
+   */
+  const filePath = useMemo(() => {
+    if (image && isElectron()) {
+      // Electron環境ではFile.pathプロパティが利用可能
+      const file = image.file as File & { path?: string };
+      return file.path || null;
+    }
+    return null;
+  }, [image]);
 
   // 画像が選択されていない場合は何も表示しない
   if (!image) {
@@ -146,6 +160,29 @@ export function ImagePreview() {
               {image.name}
             </span>
           </div>
+          {/* Electron環境でのみファイルパスを表示 */}
+          {filePath && (
+            <div className="flex justify-between items-start gap-2">
+              <span className="text-muted-foreground flex-shrink-0">パス:</span>
+              <div className="flex items-center gap-1 flex-1 min-w-0">
+                <span className="font-medium truncate text-right text-xs" title={filePath}>
+                  {filePath}
+                </span>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-6 w-6 flex-shrink-0"
+                  onClick={() => {
+                    navigator.clipboard.writeText(filePath);
+                    toast.success('パスをコピーしました');
+                  }}
+                  title="パスをコピー"
+                >
+                  <FolderOpen className="h-3 w-3" />
+                </Button>
+              </div>
+            </div>
+          )}
           <div className="flex justify-between items-center gap-2">
             <span className="text-muted-foreground flex-shrink-0">サイズ:</span>
             <span className="font-medium">{formatFileSize(image.size)}</span>

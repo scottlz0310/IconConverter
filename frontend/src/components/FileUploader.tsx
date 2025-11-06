@@ -17,6 +17,8 @@ import { useDropzone } from 'react-dropzone';
 import { Upload, FileImage } from 'lucide-react';
 import { toast } from 'sonner';
 import { useImageStore } from '../stores/imageStore';
+import { imageAPI } from '../adapters/image-api';
+import { isElectron } from '../utils/electron';
 import { Button } from './ui/button';
 import { Card } from './ui/card';
 import type { ImageFile } from '../types';
@@ -57,6 +59,61 @@ const formatFileSize = (bytes: number): string => {
 export function FileUploader() {
   const { setImage, setError } = useImageStore();
   const previousPreviewRef = useRef<string | null>(null);
+
+  /**
+   * ネイティブファイルダイアログを使用したファイル選択（Electron環境）
+   * 要件2.3: Native_Dialogを使用
+   */
+  const handleNativeFileSelect = async () => {
+    try {
+      const file = await imageAPI.selectFile();
+      if (file) {
+        // ファイルバリデーション
+        const validation = await imageAPI.validateFile(file);
+        if (!validation.isValid) {
+          setError(validation.error || 'ファイルの検証に失敗しました');
+          toast.error('ファイルエラー', {
+            description: validation.error || 'ファイルの検証に失敗しました',
+            duration: 5000,
+          });
+          return;
+        }
+
+        // メモリ最適化: 前の画像のData URLを解放
+        if (previousPreviewRef.current && previousPreviewRef.current.startsWith('blob:')) {
+          URL.revokeObjectURL(previousPreviewRef.current);
+          previousPreviewRef.current = null;
+        }
+
+        // Data URLを生成してImageFileオブジェクトを作成
+        const preview = URL.createObjectURL(file);
+        previousPreviewRef.current = preview;
+
+        const imageFile: ImageFile = {
+          file,
+          preview,
+          name: file.name,
+          size: file.size,
+          type: file.type,
+        };
+
+        // ストアに保存
+        setImage(imageFile);
+
+        // 成功通知
+        toast.success('ファイルを読み込みました', {
+          description: `${file.name} (${formatFileSize(file.size)})`,
+        });
+      }
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : 'ファイルの選択に失敗しました';
+      setError(errorMessage);
+      toast.error('ファイルエラー', {
+        description: errorMessage,
+        duration: 5000,
+      });
+    }
+  };
 
   /**
    * ファイルドロップ時の処理
@@ -192,6 +249,14 @@ export function FileUploader() {
                 variant="outline"
                 size="lg"
                 className="mt-1 sm:mt-2 min-h-[48px] touch-manipulation"
+                onClick={(e) => {
+                  // Electron環境ではネイティブダイアログを使用
+                  if (isElectron()) {
+                    e.stopPropagation();
+                    handleNativeFileSelect();
+                  }
+                  // Web環境ではデフォルトのドロップゾーン動作を使用
+                }}
               >
                 ファイルを選択
               </Button>

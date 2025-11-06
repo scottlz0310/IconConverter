@@ -36,6 +36,21 @@ export interface ConversionOptions {
 export type ConversionStatus = 'idle' | 'uploading' | 'converting' | 'success' | 'error';
 
 /**
+ * Electron固有の設定
+ * 要件3.3: Electron固有状態の追加
+ */
+export interface ElectronSettings {
+  /** ウィンドウの最小化状態 */
+  isMinimized: boolean;
+  /** ファイル関連付けの有効/無効 */
+  fileAssociation: boolean;
+  /** 自動更新の有効/無効 */
+  autoUpdate: boolean;
+  /** 起動時に最小化 */
+  startMinimized: boolean;
+}
+
+/**
  * アプリケーション状態（Zustandストア用）
  */
 export interface AppState {
@@ -47,6 +62,8 @@ export interface AppState {
   status: ConversionStatus;
   /** エラーメッセージ */
   error: string | null;
+  /** Electron固有の設定 */
+  electronSettings: ElectronSettings | null;
   /** 画像を設定 */
   setImage: (image: ImageFile | null) => void;
   /** オプションを設定 */
@@ -55,6 +72,8 @@ export interface AppState {
   setStatus: (status: ConversionStatus) => void;
   /** エラーを設定 */
   setError: (error: string | null) => void;
+  /** Electron設定を設定 */
+  setElectronSettings: (settings: ElectronSettings | null) => void;
   /** 状態をリセット */
   reset: () => void;
 }

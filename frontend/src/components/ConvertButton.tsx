@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 import { Button } from './ui/button';
 import { useImageStore } from '../stores/imageStore';
 import { useImageConversion } from '../hooks/useImageConversion';
+import { imageAPI } from '../adapters/image-api';
+import { isElectron } from '../utils/electron';
 
 /**
  * 変換ボタンコンポーネント
@@ -24,37 +26,41 @@ export function ConvertButton() {
 
   // 画像変換フックの使用
   const { mutate: convertImage, isPending } = useImageConversion({
-    onSuccess: (blob: Blob) => {
+    onSuccess: async (blob: Blob) => {
       // 要件4.4: 変換成功時の処理
       setStatus('success');
 
-      // Blobからダウンロードリンクを生成
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
+      try {
+        // ファイル名の設定（元のファイル名.ico）
+        const originalName = image?.name || 'image';
+        const baseName = originalName.replace(/\.[^/.]+$/, ''); // 拡張子を除去
+        const filename = `${baseName}.ico`;
 
-      // ファイル名の設定（元のファイル名.ico）
-      const originalName = image?.name || 'image';
-      const baseName = originalName.replace(/\.[^/.]+$/, ''); // 拡張子を除去
-      link.download = `${baseName}.ico`;
+        // 環境に応じた保存処理（ElectronまたはWeb）
+        await imageAPI.saveFile(blob, filename);
 
-      // 自動ダウンロードのトリガー
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+        // 成功トースト通知
+        toast.success('変換完了', {
+          description: isElectron()
+            ? 'ICOファイルを保存しました'
+            : 'ICOファイルのダウンロードを開始しました',
+        });
 
-      // メモリ解放
-      URL.revokeObjectURL(url);
-
-      // 成功トースト通知
-      toast.success('変換完了', {
-        description: 'ICOファイルのダウンロードを開始しました',
-      });
-
-      // 状態をidleに戻す
-      setTimeout(() => {
+        // 状態をidleに戻す
+        setTimeout(() => {
+          setStatus('idle');
+        }, 2000);
+      } catch (error) {
+        // 保存キャンセルまたはエラー
+        const errorMessage = error instanceof Error ? error.message : '保存に失敗しました';
+        if (!errorMessage.includes('cancelled')) {
+          setError(errorMessage);
+          toast.error('保存エラー', {
+            description: errorMessage,
+          });
+        }
         setStatus('idle');
-      }, 2000);
+      }
     },
     onError: (error: string) => {
       // 要件4.5: エラーハンドリング
