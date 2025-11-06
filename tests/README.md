@@ -117,9 +117,22 @@ npm run test:performance
 npm test
 ```
 
+### 全機能テストスイートを実行（タスク14.1）
+
+```bash
+# 全機能テストスイート（統合、ユニット、E2E、アクセシビリティ、パフォーマンス）
+npm run test:full
+
+# または直接実行
+./tests/run-full-feature-test.sh
+```
+
 ### 個別のテストスイートを実行
 
 ```bash
+# 統合テストのみ
+npm run test:integration
+
 # ユニットテストのみ
 npm run test:unit
 

@@ -7,7 +7,7 @@
 const { defineConfig, devices } = require("@playwright/test");
 
 module.exports = defineConfig({
-  testDir: "./tests/e2e",
+  testDir: "./tests",
 
   // テストタイムアウト
   timeout: 30000,
@@ -43,10 +43,17 @@ module.exports = defineConfig({
   projects: [
     {
       name: "electron-app",
-      testMatch: /.*\.spec\.js/,
+      testMatch: /e2e\/.*\.spec\.js/,
       use: {
         ...devices["Desktop Chrome"],
         // Electron固有の設定はテストファイル内で行う
+      },
+    },
+    {
+      name: "integration",
+      testMatch: /integration\/.*\.spec\.js/,
+      use: {
+        ...devices["Desktop Chrome"],
       },
     },
     {

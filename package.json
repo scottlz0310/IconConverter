@@ -33,6 +33,9 @@
     "test:e2e:debug": "playwright test --debug",
     "test:accessibility": "playwright test --grep @accessibility",
     "test:performance": "node tests/performance/performance-test.js",
+    "test:full": "bash tests/run-full-feature-test.sh",
+    "test:integration": "playwright test tests/integration/full-feature-test.spec.js",
+    "test:setup": "node tests/setup/create-test-images.js",
     "release:notes": "node build/generate-release-notes.js",
     "release:prepare": "bash build/prepare-release.sh"
   },
