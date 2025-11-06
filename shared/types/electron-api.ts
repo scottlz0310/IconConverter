@@ -172,6 +172,11 @@ export interface ElectronAPI {
   showWindow(): Promise<void>;
   /** システムトレイに最小化 */
   minimizeToTray(): Promise<void>;
+  /** バックグラウンドで変換を実行 */
+  backgroundConvert(
+    filePath: string,
+    options?: ConversionOptions,
+  ): Promise<{ success: boolean; outputPath?: string; error?: string }>;
 
   // ファイル操作
   /** 画像ファイルを選択 */
@@ -217,6 +222,10 @@ export interface ElectronAPI {
   /** CPU使用量を取得 */
   getCPUUsage(): Promise<CPUInfo>;
 
+  // コマンドライン引数からのファイル取得
+  /** 保留中のファイルパスを取得（コマンドライン引数から） */
+  getPendingFile(): Promise<string | null>;
+
   // イベントリスナー
   /** 更新が利用可能になったときのコールバック */
   onUpdateAvailable(callback: (info: UpdateInfo) => void): void;
@@ -226,6 +235,8 @@ export interface ElectronAPI {
   onQuickConvert(callback: (filePath: string) => void): void;
   /** 更新進捗のコールバック */
   onUpdateProgress(callback: (progress: UpdateProgress) => void): void;
+  /** コマンドライン引数からファイルを開くときのコールバック */
+  onOpenFileFromCLI(callback: (filePath: string) => void): void;
 
   // イベントリスナーの削除
   /** 更新利用可能リスナーを削除 */
@@ -236,6 +247,8 @@ export interface ElectronAPI {
   removeQuickConvertListener(): void;
   /** 更新進捗リスナーを削除 */
   removeUpdateProgressListener(): void;
+  /** コマンドライン引数からのファイルオープンリスナーを削除 */
+  removeOpenFileFromCLIListener(): void;
 }
 
 /**

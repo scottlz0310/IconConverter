@@ -47,6 +47,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   // ウィンドウ制御
   showWindow: () => ipcRenderer.invoke("show-window"),
   minimizeToTray: () => ipcRenderer.invoke("minimize-to-tray"),
+  backgroundConvert: (filePath, options) =>
+    ipcRenderer.invoke("background-convert", filePath, options),
 
   // ファイル操作（要件2.3, 2.4: Native_Dialog、ドラッグ&ドロップ）
   selectImageFile: () => ipcRenderer.invoke("select-image-file"),
@@ -103,6 +105,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getMemoryUsage: () => ipcRenderer.invoke("get-memory-usage"),
   getCPUUsage: () => ipcRenderer.invoke("get-cpu-usage"),
 
+  // コマンドライン引数からのファイル取得（要件2.1: コマンドライン引数での起動対応）
+  getPendingFile: () => ipcRenderer.invoke("get-pending-file"),
+
   // イベントリスナー（一方向通信）
   onUpdateAvailable: (callback) => {
     ipcRenderer.on("update-available", (_event, info) => callback(info));
@@ -115,6 +120,12 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   onUpdateProgress: (callback) => {
     ipcRenderer.on("update-progress", (_event, progress) => callback(progress));
+  },
+  // 要件2.1: コマンドライン引数からのファイルオープン
+  onOpenFileFromCLI: (callback) => {
+    ipcRenderer.on("open-file-from-cli", (_event, filePath) =>
+      callback(filePath),
+    );
   },
 
   // イベントリスナーの削除
@@ -129,6 +140,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   removeUpdateProgressListener: () => {
     ipcRenderer.removeAllListeners("update-progress");
+  },
+  removeOpenFileFromCLIListener: () => {
+    ipcRenderer.removeAllListeners("open-file-from-cli");
   },
 });
 

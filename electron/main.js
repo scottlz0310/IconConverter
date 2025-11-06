@@ -6,6 +6,7 @@ const { autoUpdater } = require("electron-updater");
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
 
 let mainWindow = null;
+let trayManager = null;
 
 /**
  * セキュアなウィンドウを作成
@@ -85,10 +86,57 @@ function createWindow() {
     return { action: "deny" };
   });
 
-  // ウィンドウが閉じられたときの処理
+  // ウィンドウが閉じられたときの処理（要件2.2: バックグラウンド実行）
+  mainWindow.on("close", (event) => {
+    // macOS以外では、ウィンドウを閉じる代わりにトレイに最小化
+    if (
+      process.platform !== "darwin" &&
+      trayManager &&
+      trayManager.isCreated()
+    ) {
+      event.preventDefault();
+      mainWindow.hide();
+    }
+  });
+
   mainWindow.on("closed", () => {
     mainWindow = null;
   });
+}
+
+/**
+ * コマンドライン引数からファイルパスを処理
+ * 要件2.1: コマンドライン引数での起動対応
+ */
+let pendingFilePath = null;
+
+function handleCommandLineFile(argv) {
+  // 要件1.1: PNG、JPEG、BMP、GIF、TIFF、WebP対応
+  const supportedExtensions = [
+    ".png",
+    ".jpg",
+    ".jpeg",
+    ".bmp",
+    ".gif",
+    ".tiff",
+    ".tif",
+    ".webp",
+  ];
+
+  // コマンドライン引数からファイルパスを検索
+  for (let i = 1; i < argv.length; i++) {
+    const arg = argv[i];
+    // オプション引数をスキップ
+    if (arg.startsWith("-")) continue;
+
+    // ファイルパスかどうかを確認
+    const ext = path.extname(arg).toLowerCase();
+    if (supportedExtensions.includes(ext)) {
+      return arg;
+    }
+  }
+
+  return null;
 }
 
 /**
@@ -97,10 +145,17 @@ function createWindow() {
 app.whenReady().then(() => {
   createWindow();
 
+  // システムトレイを作成（要件2.2: System_Tray機能）
+  const TrayManager = require("./services/tray-manager");
+  trayManager = new TrayManager(mainWindow);
+  trayManager.create();
+
   // macOS: Dockアイコンクリック時の処理
   app.on("activate", () => {
     if (BrowserWindow.getAllWindows().length === 0) {
       createWindow();
+    } else if (mainWindow) {
+      mainWindow.show();
     }
   });
 
@@ -108,14 +163,76 @@ app.whenReady().then(() => {
   if (process.env.NODE_ENV !== "development") {
     autoUpdater.checkForUpdatesAndNotify();
   }
+
+  // 要件2.1: コマンドライン引数で渡されたファイルを処理
+  const filePath = handleCommandLineFile(process.argv);
+  if (filePath) {
+    pendingFilePath = filePath;
+    // ウィンドウが準備できたらファイルを送信
+    if (mainWindow && mainWindow.webContents) {
+      mainWindow.webContents.once("did-finish-load", () => {
+        mainWindow.webContents.send("open-file-from-cli", pendingFilePath);
+        pendingFilePath = null;
+      });
+    }
+  }
+});
+
+/**
+ * Windows/Linux: 既に起動している場合の処理
+ * 要件2.1: ファイルパス受け渡し処理
+ */
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // 既にインスタンスが起動している場合は終了
+  app.quit();
+} else {
+  app.on("second-instance", (event, commandLine, workingDirectory) => {
+    // 既存のウィンドウを表示
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+
+      // コマンドライン引数からファイルパスを取得
+      const filePath = handleCommandLineFile(commandLine);
+      if (filePath) {
+        // レンダラープロセスにファイルパスを送信
+        mainWindow.webContents.send("open-file-from-cli", filePath);
+      }
+    }
+  });
+}
+
+/**
+ * macOS: ファイルを開く処理
+ * 要件2.1: ファイルパス受け渡し処理
+ */
+app.on("open-file", (event, filePath) => {
+  event.preventDefault();
+
+  if (mainWindow && mainWindow.webContents) {
+    // ウィンドウが既に存在する場合
+    mainWindow.show();
+    mainWindow.focus();
+    mainWindow.webContents.send("open-file-from-cli", filePath);
+  } else {
+    // ウィンドウがまだ作成されていない場合は保留
+    pendingFilePath = filePath;
+  }
 });
 
 /**
  * すべてのウィンドウが閉じられたときの処理
  */
 app.on("window-all-closed", () => {
-  // macOS以外ではアプリケーションを終了
-  if (process.platform !== "darwin") {
+  // システムトレイが有効な場合はバックグラウンドで実行を継続
+  // macOS以外でトレイが無効な場合はアプリケーションを終了
+  if (
+    process.platform !== "darwin" &&
+    (!trayManager || !trayManager.isCreated())
+  ) {
     app.quit();
   }
 });
@@ -124,7 +241,11 @@ app.on("window-all-closed", () => {
  * アプリケーション終了前の処理
  */
 app.on("before-quit", () => {
-  // クリーンアップ処理
+  // システムトレイを破棄
+  if (trayManager) {
+    trayManager.destroy();
+    trayManager = null;
+  }
 });
 
 /**
@@ -389,6 +510,24 @@ ipcMain.handle("minimize-to-tray", async () => {
   }
 });
 
+// バックグラウンド変換（要件2.2: バックグラウンドでの変換処理）
+ipcMain.handle("background-convert", async (event, filePath, options) => {
+  try {
+    if (trayManager) {
+      const result = await trayManager.performBackgroundConversion(
+        filePath,
+        options,
+      );
+      return result;
+    } else {
+      throw new Error("Tray manager not initialized");
+    }
+  } catch (error) {
+    console.error("IPC background-convert error:", error);
+    throw error;
+  }
+});
+
 // パフォーマンス監視（要件4.3: メモリ使用量）
 ipcMain.handle("get-memory-usage", async () => {
   const usage = process.memoryUsage();
@@ -408,6 +547,13 @@ ipcMain.handle("get-cpu-usage", async () => {
     system: usage.system,
     percentage: Math.round((usage.user + usage.system) / 1000000), // 概算
   };
+});
+
+// 保留中のファイルパスを取得（要件2.1: コマンドライン引数での起動対応）
+ipcMain.handle("get-pending-file", async () => {
+  const filePath = pendingFilePath;
+  pendingFilePath = null; // 取得後はクリア
+  return filePath;
 });
 
 // エラーハンドリング
