@@ -40,6 +40,7 @@ npm run dev
 ```
 
 このコマンドは以下を実行します：
+
 1. フロントエンド開発サーバー（Vite）を起動
 2. Electronアプリケーションを起動
 
@@ -80,6 +81,26 @@ npm run package:all
 ```
 
 ビルドされたアプリケーションは `dist-electron/` ディレクトリに出力されます。
+
+### コード署名付きビルド
+
+配布用のビルドには、コード署名が必要です。詳細は以下のドキュメントを参照してください：
+
+- **クイックスタート**: [build/SIGNING_QUICKSTART.md](build/SIGNING_QUICKSTART.md)
+- **詳細ガイド**: [build/CODE_SIGNING.md](build/CODE_SIGNING.md)
+- **実装サマリー**: [build/SIGNING_IMPLEMENTATION_SUMMARY.md](build/SIGNING_IMPLEMENTATION_SUMMARY.md)
+
+#### 署名設定のテスト
+
+```bash
+npm run test:signing-setup
+```
+
+#### 署名の検証
+
+```bash
+npm run verify:signing
+```
 
 ## プロジェクト構造
 
@@ -145,15 +166,65 @@ await imageAPI.saveFile(blob, 'output.ico');
 2. `frontend/node_modules`を削除して再インストール
 3. Viteの設定を確認: `frontend/vite.config.ts`
 
+## コード署名
+
+アプリケーションの配布には、コード署名が推奨されます。詳細は [build/CODE_SIGNING.md](build/CODE_SIGNING.md) を参照してください。
+
+### 署名設定のテスト
+
+```bash
+# 署名設定をテスト
+npm run test:signing-setup
+
+# ビルド後に署名を検証
+npm run verify:signing
+```
+
+### 環境変数の設定
+
+**Windows:**
+
+```bash
+export WIN_CSC_LINK="/path/to/certificate.pfx"
+export WIN_CSC_KEY_PASSWORD="your-password"  # pragma: allowlist secret
+```
+
+**macOS:**
+
+```bash
+export CSC_LINK="/path/to/certificate.p12"
+export CSC_KEY_PASSWORD="your-password"  # pragma: allowlist secret
+export APPLE_ID="your-apple-id@example.com"
+export APPLE_ID_PASSWORD="app-specific-password"  # pragma: allowlist secret
+export APPLE_TEAM_ID="YOUR_TEAM_ID"
+```
+
+詳細な設定方法は [build/CODE_SIGNING.md](build/CODE_SIGNING.md) を参照してください。
+
+## CI/CD
+
+GitHub Actionsを使用した自動ビルドとリリースが設定されています：
+
+- `.github/workflows/build-and-sign.yml` - ビルドと署名の自動化
+- `.github/workflows/verify-signing.yml` - 署名設定の検証
+
+タグをプッシュすると、自動的にビルド、署名、リリースが実行されます：
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
 ## 次のステップ
 
 現在、基本的なElectron環境が構築されました。次のフェーズで以下の機能を実装します：
 
-- [ ] 画像処理ロジック（sharp統合）
-- [ ] ファイルシステム統合（ダイアログ、ドラッグ&ドロップ）
-- [ ] システムトレイ機能
-- [ ] ファイル関連付け
-- [ ] 自動更新機能
+- [x] 画像処理ロジック（sharp統合）
+- [x] ファイルシステム統合（ダイアログ、ドラッグ&ドロップ）
+- [x] システムトレイ機能
+- [x] ファイル関連付け
+- [x] 自動更新機能
+- [x] コード署名とCI/CD統合
 
 ## ライセンス
 

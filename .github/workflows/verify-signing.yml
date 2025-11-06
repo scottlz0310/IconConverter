@@ -1,0 +1,186 @@
+name: Verify Code Signing
+
+# 要件6.1: 署名検証テスト
+# プルリクエストやプッシュ時に署名設定を検証
+
+on:
+    pull_request:
+        paths:
+            - "build/sign.js"
+            - "build/notarize.js"
+            - "build/verify-signing.js"
+            - "build/entitlements.mac.plist"
+            - "package.json"
+            - ".github/workflows/build-and-sign.yml"
+    push:
+        branches:
+            - main
+            - develop
+        paths:
+            - "build/sign.js"
+            - "build/notarize.js"
+            - "build/verify-signing.js"
+            - "build/entitlements.mac.plist"
+            - "package.json"
+    workflow_dispatch:
+
+jobs:
+    validate-signing-scripts:
+        name: Validate Signing Scripts
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+
+            - name: Validate sign.js syntax
+              run: node -c build/sign.js
+
+            - name: Validate notarize.js syntax
+              run: node -c build/notarize.js
+
+            - name: Validate verify-signing.js syntax
+              run: node -c build/verify-signing.js
+
+            - name: Check entitlements.mac.plist
+              run: |
+                  if [ ! -f build/entitlements.mac.plist ]; then
+                    echo "Error: entitlements.mac.plist not found"
+                    exit 1
+                  fi
+
+                  # XMLの構文チェック
+                  xmllint --noout build/entitlements.mac.plist || exit 1
+
+                  echo "✓ entitlements.mac.plist is valid"
+
+            - name: Verify package.json configuration
+              run: |
+                  # afterSignとbeforeBuildが設定されているか確認
+                  if ! grep -q '"afterSign": "build/notarize.js"' package.json; then
+                    echo "Warning: afterSign not configured in package.json"
+                  fi
+
+                  if ! grep -q '"beforeBuild": "build/sign.js"' package.json; then
+                    echo "Warning: beforeBuild not configured in package.json"
+                  fi
+
+                  echo "✓ package.json configuration checked"
+
+    test-signing-without-credentials:
+        name: Test Signing (No Credentials)
+        strategy:
+            matrix:
+                os: [windows-latest, macos-latest, ubuntu-latest]
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Test signing scripts (should skip gracefully)
+              run: |
+                  # 環境変数なしでビルドを試行（署名はスキップされるべき）
+                  npm run build:frontend
+
+                  # 署名スクリプトが正常にスキップされることを確認
+                  node -e "
+                    const sign = require('./build/sign.js');
+                    const config = { platformName: process.platform === 'win32' ? 'win' : process.platform === 'darwin' ? 'darwin' : 'linux' };
+                    sign.default(config).then(() => {
+                      console.log('✓ Signing script executed successfully (skipped without credentials)');
+                    }).catch(err => {
+                      console.error('✗ Signing script failed:', err);
+                      process.exit(1);
+                    });
+                  "
+
+    check-documentation:
+        name: Check Documentation
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout code
+              uses: actions/checkout@v4
+
+            - name: Check CODE_SIGNING.md exists
+              run: |
+                  if [ ! -f build/CODE_SIGNING.md ]; then
+                    echo "Error: CODE_SIGNING.md not found"
+                    exit 1
+                  fi
+                  echo "✓ CODE_SIGNING.md exists"
+
+            - name: Validate documentation completeness
+              run: |
+                  # 必要なセクションが含まれているか確認
+                  sections=(
+                    "Windows コード署名"
+                    "macOS コード署名"
+                    "CI/CD 統合"
+                    "署名の検証"
+                    "トラブルシューティング"
+                  )
+
+                  for section in "${sections[@]}"; do
+                    if ! grep -q "$section" build/CODE_SIGNING.md; then
+                      echo "Error: Section '$section' not found in CODE_SIGNING.md"
+                      exit 1
+                    fi
+                  done
+
+                  echo "✓ All required sections found in documentation"
+
+            - name: Check for sensitive information
+              run: |
+                  # ドキュメントに実際の証明書やパスワードが含まれていないか確認
+                  if grep -iE "(password|secret|key).*[:=].*['\"].*['\"]" build/CODE_SIGNING.md | grep -v "your-password" | grep -v "example"; then
+                    echo "Warning: Potential sensitive information found in documentation"
+                    exit 1
+                  fi
+
+                  echo "✓ No sensitive information found in documentation"
+
+    summary:
+        name: Verification Summary
+        needs:
+            [
+                validate-signing-scripts,
+                test-signing-without-credentials,
+                check-documentation,
+            ]
+        runs-on: ubuntu-latest
+        if: always()
+
+        steps:
+            - name: Check all jobs status
+              run: |
+                  echo "=== Verification Summary ==="
+                  echo ""
+                  echo "Validate Signing Scripts: ${{ needs.validate-signing-scripts.result }}"
+                  echo "Test Signing (No Credentials): ${{ needs.test-signing-without-credentials.result }}"
+                  echo "Check Documentation: ${{ needs.check-documentation.result }}"
+                  echo ""
+
+                  if [ "${{ needs.validate-signing-scripts.result }}" != "success" ] || \
+                     [ "${{ needs.test-signing-without-credentials.result }}" != "success" ] || \
+                     [ "${{ needs.check-documentation.result }}" != "success" ]; then
+                    echo "✗ Some verification checks failed"
+                    exit 1
+                  fi
+
+                  echo "✓ All verification checks passed"

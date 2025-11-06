@@ -21,8 +21,18 @@
     "start": "electron .",
     "postinstall": "electron-builder install-app-deps",
     "verify:build": "node build/verify-build.js",
+    "verify:signing": "node build/verify-signing.js",
+    "test:signing-setup": "node build/test-signing-setup.js",
     "icons:placeholder": "node build/create-placeholder-icons.js",
-    "icons:generate": "node build/generate-icons.js"
+    "icons:generate": "node build/generate-icons.js",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "jest --config jest.config.js",
+    "test:e2e": "playwright test",
+    "test:e2e:ui": "playwright test --ui",
+    "test:e2e:headed": "playwright test --headed",
+    "test:e2e:debug": "playwright test --debug",
+    "test:accessibility": "playwright test --grep @accessibility",
+    "test:performance": "node tests/performance/performance-test.js"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -34,9 +44,15 @@
     "winreg": "^1.2.5"
   },
   "devDependencies": {
+    "@electron/notarize": "^2.5.0",
+    "@playwright/test": "^1.56.1",
+    "axe-core": "^4.11.0",
+    "axe-playwright": "^2.2.2",
     "concurrently": "^9.1.2",
     "electron": "^35.0.0",
     "electron-builder": "^25.1.8",
+    "jest": "^29.7.0",
+    "playwright": "^1.56.1",
     "wait-on": "^8.0.1"
   },
   "build": {
@@ -103,7 +119,9 @@
             "arm64"
           ]
         }
-      ]
+      ],
+      "type": "distribution",
+      "minimumSystemVersion": "10.15.0"
     },
     "dmg": {
       "contents": [
@@ -139,7 +157,13 @@
             "x64"
           ]
         }
-      ]
+      ],
+      "certificateSubjectName": "IconConverter Team",
+      "signingHashAlgorithms": [
+        "sha256"
+      ],
+      "signDlls": true,
+      "rfc3161TimeStampServer": "http://timestamp.digicert.com"
     },
     "nsis": {
       "oneClick": false,
@@ -219,6 +243,8 @@
       "owner": "iconconverter",
       "repo": "iconconverter"
     },
+    "afterSign": "build/notarize.js",
+    "beforeBuild": "build/sign.js",
     "compression": "maximum",
     "asar": true,
     "asarUnpack": [

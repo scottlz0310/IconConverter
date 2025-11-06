@@ -45,6 +45,14 @@ test-results.txt
 backend/htmlcov/
 backend/.coverage
 
+# Electron test artifacts
+test-results/
+playwright-report/
+coverage/electron/
+*.spec.js.snap
+test-results.json
+performance-results.json
+
 # Type checking and linting
 .mypy_cache/
 .ruff_cache/
@@ -88,6 +96,18 @@ logs/
 .env.development.local
 .env.test.local
 .env.production.local
+
+# Code signing certificates and keys
+*.pfx
+*.p12
+*.cer
+*.crt
+*.key
+*.pem
+build/.env.signing
+build/certificate.*
+certificates/
+.signing/
 
 # Archives
 *.zip

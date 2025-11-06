@@ -1,0 +1,195 @@
+name: Electron Tests
+
+on:
+    push:
+        branches: [main, develop]
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    unit-tests:
+        name: ユニットテスト
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Run unit tests
+              run: npm run test:unit
+
+            - name: Upload coverage
+              uses: codecov/codecov-action@v4
+              with:
+                  files: ./coverage/electron/lcov.info
+                  flags: electron-unit
+                  name: electron-unit-coverage
+
+    e2e-tests:
+        name: E2Eテスト
+        strategy:
+            matrix:
+                os: [ubuntu-latest, windows-latest, macos-latest]
+
+        runs-on: ${{ matrix.os }}
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Playwright browsers
+              run: npx playwright install --with-deps
+
+            - name: Build frontend
+              run: npm run build:frontend
+
+            - name: Run E2E tests
+              run: npm run test:e2e
+
+            - name: Upload test results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: playwright-report-${{ matrix.os }}
+                  path: test-results/
+                  retention-days: 30
+
+    accessibility-tests:
+        name: アクセシビリティテスト
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Playwright browsers
+              run: npx playwright install --with-deps
+
+            - name: Build frontend
+              run: npm run build:frontend
+
+            - name: Run accessibility tests
+              run: npm run test:accessibility
+
+            - name: Upload accessibility report
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: accessibility-report
+                  path: test-results/
+                  retention-days: 30
+
+    performance-tests:
+        name: パフォーマンステスト
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v4
+
+            - name: Setup Node.js
+              uses: actions/setup-node@v4
+              with:
+                  node-version: "20"
+                  cache: "npm"
+
+            - name: Install dependencies
+              run: npm ci
+
+            - name: Install Playwright browsers
+              run: npx playwright install --with-deps
+
+            - name: Build frontend
+              run: npm run build:frontend
+
+            - name: Run performance tests
+              run: npm run test:performance
+
+            - name: Upload performance results
+              if: always()
+              uses: actions/upload-artifact@v4
+              with:
+                  name: performance-results
+                  path: test-results/performance-results.json
+                  retention-days: 30
+
+            - name: Comment PR with performance results
+              if: github.event_name == 'pull_request'
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                      const fs = require('fs');
+                      const results = JSON.parse(fs.readFileSync('test-results/performance-results.json', 'utf8'));
+
+                      const body = `## パフォーマンステスト結果
+
+                      | 項目 | 結果 | 目標 | 状態 |
+                      |------|------|------|------|
+                      | 起動時間 | ${results.startupTime}ms | 3000ms | ${results.passed.startup ? '✅' : '❌'} |
+                      | 変換時間 | ${results.conversionTime}ms | 5000ms | ${results.passed.conversion ? '✅' : '❌'} |
+                      | メモリ使用量 | ${results.memoryUsage?.heapUsed}MB | 200MB | ${results.passed.memory ? '✅' : '❌'} |
+                      | CPU使用率 | ${results.cpuUsage?.percent}% | 5% | ${results.passed.cpu ? '✅' : '❌'} |
+                      `;
+
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: body
+                      });
+
+    test-summary:
+        name: テスト結果サマリー
+        needs: [unit-tests, e2e-tests, accessibility-tests, performance-tests]
+        runs-on: ubuntu-latest
+        if: always()
+
+        steps:
+            - name: Check test results
+              run: |
+                  echo "すべてのテストが完了しました"
+
+                  if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+                    echo "❌ ユニットテスト失敗"
+                    exit 1
+                  fi
+
+                  if [ "${{ needs.e2e-tests.result }}" != "success" ]; then
+                    echo "❌ E2Eテスト失敗"
+                    exit 1
+                  fi
+
+                  if [ "${{ needs.accessibility-tests.result }}" != "success" ]; then
+                    echo "❌ アクセシビリティテスト失敗"
+                    exit 1
+                  fi
+
+                  if [ "${{ needs.performance-tests.result }}" != "success" ]; then
+                    echo "❌ パフォーマンステスト失敗"
+                    exit 1
+                  fi
+
+                  echo "✅ すべてのテストが合格しました"
