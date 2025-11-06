@@ -118,12 +118,21 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getPerformanceStats: () => ipcRenderer.invoke("get-performance-stats"),
   cleanupMemory: () => ipcRenderer.invoke("cleanup-memory"),
 
+  // 自動更新機能（要件6.3, 10.2: セキュアな検証付き自動更新）
+  checkForUpdates: () => ipcRenderer.invoke("check-for-updates"),
+  getCurrentVersion: () => ipcRenderer.invoke("get-current-version"),
+  downloadUpdate: () => ipcRenderer.invoke("download-update"),
+  installUpdate: () => ipcRenderer.invoke("install-update"),
+
   // イベントリスナー（一方向通信）
   onUpdateAvailable: (callback) => {
     ipcRenderer.on("update-available", (_event, info) => callback(info));
   },
   onUpdateDownloaded: (callback) => {
     ipcRenderer.on("update-downloaded", (_event, info) => callback(info));
+  },
+  onUpdateDownloading: (callback) => {
+    ipcRenderer.on("update-downloading", (_event, info) => callback(info));
   },
   onQuickConvert: (callback) => {
     ipcRenderer.on("quick-convert", (_event, filePath) => callback(filePath));
@@ -144,6 +153,9 @@ contextBridge.exposeInMainWorld("electronAPI", {
   },
   removeUpdateDownloadedListener: () => {
     ipcRenderer.removeAllListeners("update-downloaded");
+  },
+  removeUpdateDownloadingListener: () => {
+    ipcRenderer.removeAllListeners("update-downloading");
   },
   removeQuickConvertListener: () => {
     ipcRenderer.removeAllListeners("quick-convert");

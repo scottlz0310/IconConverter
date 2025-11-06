@@ -1,9 +1,9 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("path");
-const { autoUpdater } = require("electron-updater");
 const lazyLoader = require("./utils/lazy-loader");
 const startupTimer = require("./utils/startup-timer");
 const { getMemoryManager } = require("./services/memory-manager");
+const UpdateManager = require("./services/updater");
 
 // セキュリティ設定: 最小限のシステム権限で実行
 app.commandLine.appendSwitch("disable-features", "OutOfBlinkCors");
@@ -13,6 +13,7 @@ let splashWindow = null;
 let trayManager = null;
 let workerPool = null; // 要件8.5: ワーカープロセスの管理
 let memoryManager = null; // 要件4.3, 4.4: メモリ・CPU監視
+let updateManager = null; // 要件6.3, 10.2: 自動更新機能
 
 // 起動時間計測（要件4.1: 起動時間3秒以内の目標達成）
 const appStartTime = Date.now();
@@ -301,9 +302,13 @@ app.whenReady().then(async () => {
     }
   });
 
-  // 自動更新チェック（プロダクション環境のみ）
-  if (process.env.NODE_ENV !== "development") {
-    autoUpdater.checkForUpdatesAndNotify();
+  // 自動更新マネージャーを初期化（要件6.3, 10.2: セキュアな検証付き自動更新）
+  try {
+    updateManager = new UpdateManager(mainWindow);
+    startupTimer.mark("update-manager-created", "Update manager initialized");
+    console.log("[Startup] Update manager initialized");
+  } catch (error) {
+    console.error("[Startup] Failed to initialize update manager:", error);
   }
 
   // 要件2.1: コマンドライン引数で渡されたファイルを処理
@@ -393,6 +398,12 @@ app.on("before-quit", async () => {
   if (memoryManager) {
     memoryManager.shutdown();
     memoryManager = null;
+  }
+
+  // 更新マネージャーをクリーンアップ（要件6.3, 10.2: 自動更新機能）
+  if (updateManager) {
+    updateManager.destroy();
+    updateManager = null;
   }
 
   // システムトレイを破棄
@@ -878,6 +889,76 @@ ipcMain.handle("performance-test", async (event, imageData) => {
     }
   } catch (error) {
     console.error("IPC performance-test error:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+// 自動更新関連のIPCハンドラー（要件6.3, 10.2: 自動更新機能）
+
+// 手動更新チェック
+ipcMain.handle("check-for-updates", async () => {
+  try {
+    if (updateManager) {
+      await updateManager.manualCheckForUpdates();
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        error: "Update manager not initialized",
+      };
+    }
+  } catch (error) {
+    console.error("IPC check-for-updates error:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+// 現在のアプリバージョン取得
+ipcMain.handle("get-current-version", async () => {
+  return app.getVersion();
+});
+
+// 更新のダウンロード開始
+ipcMain.handle("download-update", async () => {
+  try {
+    if (updateManager) {
+      // UpdateManagerが内部でautoUpdater.downloadUpdate()を呼び出す
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        error: "Update manager not initialized",
+      };
+    }
+  } catch (error) {
+    console.error("IPC download-update error:", error);
+    return {
+      success: false,
+      error: error.message,
+    };
+  }
+});
+
+// 更新のインストールと再起動
+ipcMain.handle("install-update", async () => {
+  try {
+    if (updateManager) {
+      // UpdateManagerが内部でautoUpdater.quitAndInstall()を呼び出す
+      return { success: true };
+    } else {
+      return {
+        success: false,
+        error: "Update manager not initialized",
+      };
+    }
+  } catch (error) {
+    console.error("IPC install-update error:", error);
     return {
       success: false,
       error: error.message,

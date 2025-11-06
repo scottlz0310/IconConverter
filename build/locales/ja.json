@@ -1,0 +1,43 @@
+{
+    "app": {
+        "name": "アイコンコンバーター",
+        "description": "画像をICO形式に変換"
+    },
+    "menu": {
+        "file": "ファイル",
+        "edit": "編集",
+        "view": "表示",
+        "window": "ウィンドウ",
+        "help": "ヘルプ"
+    },
+    "tray": {
+        "show": "IconConverterを表示",
+        "convert": "画像を変換...",
+        "settings": "設定",
+        "fileAssociation": "ファイル関連付け",
+        "about": "バージョン情報",
+        "quit": "終了"
+    },
+    "dialog": {
+        "selectImage": "変換する画像を選択",
+        "saveICO": "ICOファイルを保存",
+        "imageFiles": "画像ファイル",
+        "allFiles": "すべてのファイル"
+    },
+    "notification": {
+        "conversionComplete": "変換が完了しました",
+        "conversionFailed": "変換に失敗しました",
+        "updateAvailable": "新しいバージョンが利用可能です",
+        "updateDownloaded": "更新がダウンロードされました"
+    },
+    "error": {
+        "fileAssociationFailed": "ファイル関連付けの設定に失敗しました。管理者権限が必要な場合があります。",
+        "invalidFile": "無効なファイル形式です",
+        "fileTooLarge": "ファイルサイズが大きすぎます（最大10MB）",
+        "conversionError": "変換処理中にエラーが発生しました"
+    },
+    "about": {
+        "version": "バージョン",
+        "description": "画像をICO形式に変換するデスクトップアプリケーション"
+    }
+}

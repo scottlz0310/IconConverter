@@ -1,0 +1,95 @@
+{
+    "name": "IconConverter",
+    "productName": "IconConverter",
+    "description": "Desktop application for converting images to ICO format",
+    "version": "1.0.0",
+    "author": {
+        "name": "IconConverter Team",
+        "email": "support@iconconverter.app"
+    },
+    "homepage": "https://github.com/iconconverter/iconconverter",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/iconconverter/iconconverter.git"
+    },
+    "bugs": {
+        "url": "https://github.com/iconconverter/iconconverter/issues"
+    },
+    "keywords": [
+        "icon",
+        "converter",
+        "ico",
+        "image",
+        "graphics",
+        "desktop",
+        "electron"
+    ],
+    "categories": {
+        "mac": "public.app-category.graphics-design",
+        "linux": "Graphics"
+    },
+    "license": "MIT",
+    "copyright": "Copyright © 2024 IconConverter Team",
+    "locales": {
+        "ja": {
+            "name": "アイコンコンバーター",
+            "description": "画像をICO形式に変換するデスクトップアプリケーション",
+            "keywords": [
+                "アイコン",
+                "変換",
+                "画像",
+                "グラフィックス"
+            ]
+        },
+        "en": {
+            "name": "IconConverter",
+            "description": "Desktop application for converting images to ICO format",
+            "keywords": [
+                "icon",
+                "converter",
+                "image",
+                "graphics"
+            ]
+        }
+    },
+    "features": [
+        "Convert PNG, JPEG, BMP, GIF, TIFF, WebP to ICO format",
+        "Generate 6 icon sizes simultaneously (16x16 to 256x256)",
+        "Preserve transparency for PNG, GIF, WebP images",
+        "Automatic background removal option",
+        "Offline operation",
+        "Native file system integration",
+        "System tray support",
+        "File association with image formats"
+    ],
+    "platforms": {
+        "windows": {
+            "minimum": "10",
+            "recommended": "11",
+            "architectures": [
+                "x64"
+            ]
+        },
+        "mac": {
+            "minimum": "12.0",
+            "architectures": [
+                "x64",
+                "arm64"
+            ]
+        },
+        "linux": {
+            "distributions": [
+                "Ubuntu 20.04+",
+                "Debian 11+",
+                "Fedora 35+"
+            ],
+            "architectures": [
+                "x64"
+            ]
+        }
+    },
+    "requirements": {
+        "node": ">=20.0.0",
+        "electron": ">=32.0.0"
+    }
+}

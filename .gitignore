@@ -19,7 +19,8 @@ uv.lock
 
 # Build and distribution
 dist/
-build/
+# Python build directory (exclude Python build, but keep electron-builder resources)
+backend/build/
 *.whl
 sdist/
 wheels/

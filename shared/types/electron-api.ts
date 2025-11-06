@@ -371,11 +371,23 @@ export interface ElectronAPI {
   /** 保留中のファイルパスを取得（コマンドライン引数から） */
   getPendingFile(): Promise<string | null>;
 
+  // 自動更新機能（要件6.3, 10.2）
+  /** 手動で更新をチェック */
+  checkForUpdates(): Promise<{ success: boolean; error?: string }>;
+  /** 現在のアプリバージョンを取得 */
+  getCurrentVersion(): Promise<string>;
+  /** 更新のダウンロードを開始 */
+  downloadUpdate(): Promise<{ success: boolean; error?: string }>;
+  /** 更新をインストールして再起動 */
+  installUpdate(): Promise<{ success: boolean; error?: string }>;
+
   // イベントリスナー
   /** 更新が利用可能になったときのコールバック */
   onUpdateAvailable(callback: (info: UpdateInfo) => void): void;
   /** 更新がダウンロードされたときのコールバック */
   onUpdateDownloaded(callback: (info: UpdateInfo) => void): void;
+  /** 更新のダウンロードが開始されたときのコールバック */
+  onUpdateDownloading(callback: (info: UpdateInfo) => void): void;
   /** クイック変換が要求されたときのコールバック */
   onQuickConvert(callback: (filePath: string) => void): void;
   /** 更新進捗のコールバック */
@@ -388,6 +400,8 @@ export interface ElectronAPI {
   removeUpdateAvailableListener(): void;
   /** 更新ダウンロード完了リスナーを削除 */
   removeUpdateDownloadedListener(): void;
+  /** 更新ダウンロード開始リスナーを削除 */
+  removeUpdateDownloadingListener(): void;
   /** クイック変換リスナーを削除 */
   removeQuickConvertListener(): void;
   /** 更新進捗リスナーを削除 */

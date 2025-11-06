@@ -1,0 +1,43 @@
+{
+    "app": {
+        "name": "IconConverter",
+        "description": "Convert images to ICO format"
+    },
+    "menu": {
+        "file": "File",
+        "edit": "Edit",
+        "view": "View",
+        "window": "Window",
+        "help": "Help"
+    },
+    "tray": {
+        "show": "Show IconConverter",
+        "convert": "Convert Image...",
+        "settings": "Settings",
+        "fileAssociation": "File Association",
+        "about": "About",
+        "quit": "Quit"
+    },
+    "dialog": {
+        "selectImage": "Select Image to Convert",
+        "saveICO": "Save ICO File",
+        "imageFiles": "Image Files",
+        "allFiles": "All Files"
+    },
+    "notification": {
+        "conversionComplete": "Conversion completed",
+        "conversionFailed": "Conversion failed",
+        "updateAvailable": "A new version is available",
+        "updateDownloaded": "Update downloaded"
+    },
+    "error": {
+        "fileAssociationFailed": "Failed to set file association. Administrator privileges may be required.",
+        "invalidFile": "Invalid file format",
+        "fileTooLarge": "File size too large (maximum 10MB)",
+        "conversionError": "An error occurred during conversion"
+    },
+    "about": {
+        "version": "Version",
+        "description": "Desktop application for converting images to ICO format"
+    }
+}
