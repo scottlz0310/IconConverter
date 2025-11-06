@@ -110,26 +110,161 @@ export interface AppSettings {
  * メモリ使用量情報
  */
 export interface MemoryInfo {
-  /** 使用中のメモリ（MB） */
-  used: number;
-  /** 総メモリ（MB） */
-  total: number;
-  /** 使用率（%） */
-  percentage: number;
-  /** RSS（Resident Set Size）（MB） */
+  /** ヒープ使用量（バイト） */
+  heapUsed: number;
+  /** ヒープ使用量（MB） */
+  heapUsedMB: number;
+  /** ヒープ総量（バイト） */
+  heapTotal: number;
+  /** ヒープ総量（MB） */
+  heapTotalMB: number;
+  /** 外部メモリ（バイト） */
+  external: number;
+  /** 外部メモリ（MB） */
+  externalMB: number;
+  /** RSS（Resident Set Size）（バイト） */
   rss: number;
+  /** RSS（MB） */
+  rssMB: number;
+  /** ArrayBuffers（バイト） */
+  arrayBuffers: number;
+  /** ArrayBuffers（MB） */
+  arrayBuffersMB: number;
 }
 
 /**
  * CPU使用量情報
  */
 export interface CPUInfo {
-  /** ユーザーCPU時間（マイクロ秒） */
+  /** ユーザーCPU時間（秒） */
   user: number;
-  /** システムCPU時間（マイクロ秒） */
+  /** システムCPU時間（秒） */
   system: number;
-  /** 使用率（%、概算） */
-  percentage: number;
+  /** 総CPU時間（秒） */
+  total: number;
+  /** 使用率（%） */
+  percent: number;
+}
+
+/**
+ * パフォーマンス統計情報
+ */
+export interface PerformanceStats {
+  /** 現在の状態 */
+  current: {
+    /** メモリ使用量 */
+    memory: MemoryInfo;
+    /** CPU使用量 */
+    cpu: CPUInfo;
+    /** システムメモリ */
+    system: {
+      /** 総メモリ（バイト） */
+      total: number;
+      /** 総メモリ（MB） */
+      totalMB: number;
+      /** 空きメモリ（バイト） */
+      free: number;
+      /** 空きメモリ（MB） */
+      freeMB: number;
+      /** 使用中メモリ（バイト） */
+      used: number;
+      /** 使用中メモリ（MB） */
+      usedMB: number;
+      /** 使用率（%） */
+      usagePercent: number;
+    };
+  };
+  /** 統計情報 */
+  stats: {
+    /** 平均メモリ使用量（MB） */
+    averageMemory: number;
+    /** 平均CPU使用率（%） */
+    averageCpu: number;
+    /** ピークメモリ使用量（MB） */
+    peakMemory: number;
+    /** GC実行回数 */
+    gcCount: number;
+    /** 最終GC実行時刻 */
+    lastGcTime: number | null;
+    /** メモリ使用量履歴 */
+    memoryUsageHistory: Array<{
+      timestamp: number;
+      heapUsedMB: number;
+    }>;
+    /** CPU使用量履歴 */
+    cpuUsageHistory: Array<{
+      timestamp: number;
+      percent: number;
+    }>;
+  };
+  /** 閾値 */
+  thresholds: {
+    /** メモリ閾値 */
+    memory: {
+      warning: number;
+      critical: number;
+      target: number;
+    };
+    /** CPU閾値 */
+    cpu: {
+      warning: number;
+      critical: number;
+      target: number;
+    };
+  };
+  /** コンプライアンス */
+  compliance: {
+    /** メモリコンプライアンス */
+    memoryCompliant: boolean;
+    /** CPUコンプライアンス */
+    cpuCompliant: boolean;
+    /** 平均メモリコンプライアンス */
+    averageMemoryCompliant: boolean;
+    /** 平均CPUコンプライアンス */
+    averageCpuCompliant: boolean;
+  };
+}
+
+/**
+ * LazyLoader統計情報
+ */
+export interface LoaderStats {
+  /** ロード済みモジュール数 */
+  totalModules: number;
+  /** モジュール別統計 */
+  modules: {
+    [moduleName: string]: {
+      /** ロード時間（ミリ秒） */
+      loadTime: number;
+      /** ロード済みフラグ */
+      loaded: boolean;
+    };
+  };
+  /** 総ロード時間（ミリ秒） */
+  totalLoadTime: number;
+}
+
+/**
+ * 起動時間統計情報
+ */
+export interface StartupStats {
+  /** 起動開始時刻（Unix timestamp） */
+  startTime: number;
+  /** 経過時間（ミリ秒） */
+  elapsed: number;
+  /** 目標時間（ミリ秒） */
+  targetTime: number;
+  /** 目標時間内かどうか */
+  withinTarget: boolean;
+  /** マイルストーン */
+  milestones: Array<{
+    /** マイルストーン名 */
+    name: string;
+    /** 経過時間（ミリ秒） */
+    elapsed: number;
+    /** 説明 */
+    description: string;
+  }>;
 }
 
 /**
@@ -216,11 +351,21 @@ export interface ElectronAPI {
   /** ファイル関連付けを設定 */
   setFileAssociation(enabled: boolean): Promise<{ success: boolean }>;
 
-  // パフォーマンス監視
+  // パフォーマンス監視（要件4.3, 4.4）
   /** メモリ使用量を取得 */
   getMemoryUsage(): Promise<MemoryInfo>;
   /** CPU使用量を取得 */
-  getCPUUsage(): Promise<CPUInfo>;
+  getCpuUsage(): Promise<CPUInfo>;
+  /** パフォーマンス統計を取得 */
+  getPerformanceStats(): Promise<PerformanceStats>;
+  /** メモリクリーンアップを実行 */
+  cleanupMemory(): Promise<{ success: boolean }>;
+
+  // デバッグ用統計情報
+  /** LazyLoaderの統計情報を取得 */
+  getLoaderStats(): Promise<LoaderStats>;
+  /** 起動時間統計を取得 */
+  getStartupStats(): Promise<StartupStats>;
 
   // コマンドライン引数からのファイル取得
   /** 保留中のファイルパスを取得（コマンドライン引数から） */

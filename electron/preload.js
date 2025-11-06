@@ -105,8 +105,18 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getMemoryUsage: () => ipcRenderer.invoke("get-memory-usage"),
   getCPUUsage: () => ipcRenderer.invoke("get-cpu-usage"),
 
+  // デバッグ用統計情報（要件4.1: 起動時間最適化の監視）
+  getLoaderStats: () => ipcRenderer.invoke("get-loader-stats"),
+  getStartupStats: () => ipcRenderer.invoke("get-startup-stats"),
+
   // コマンドライン引数からのファイル取得（要件2.1: コマンドライン引数での起動対応）
   getPendingFile: () => ipcRenderer.invoke("get-pending-file"),
+
+  // パフォーマンス監視（要件4.3, 4.4: メモリ・CPU使用量監視）
+  getMemoryUsage: () => ipcRenderer.invoke("get-memory-usage"),
+  getCpuUsage: () => ipcRenderer.invoke("get-cpu-usage"),
+  getPerformanceStats: () => ipcRenderer.invoke("get-performance-stats"),
+  cleanupMemory: () => ipcRenderer.invoke("cleanup-memory"),
 
   // イベントリスナー（一方向通信）
   onUpdateAvailable: (callback) => {
