@@ -32,7 +32,9 @@
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "test:accessibility": "playwright test --grep @accessibility",
-    "test:performance": "node tests/performance/performance-test.js"
+    "test:performance": "node tests/performance/performance-test.js",
+    "release:notes": "node build/generate-release-notes.js",
+    "release:prepare": "bash build/prepare-release.sh"
   },
   "engines": {
     "node": ">=20.0.0",
@@ -190,19 +192,22 @@
         {
           "target": "AppImage",
           "arch": [
-            "x64"
+            "x64",
+            "arm64"
           ]
         },
         {
           "target": "deb",
           "arch": [
-            "x64"
+            "x64",
+            "arm64"
           ]
         },
         {
           "target": "rpm",
           "arch": [
-            "x64"
+            "x64",
+            "arm64"
           ]
         }
       ],

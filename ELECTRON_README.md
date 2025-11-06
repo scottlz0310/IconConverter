@@ -229,3 +229,63 @@ git push origin v1.0.0
 ## ライセンス
 
 MIT License
+
+## リリース
+
+### リリースプロセス
+
+詳細なリリースプロセスについては、[build/RELEASE_PROCESS.md](build/RELEASE_PROCESS.md)を参照してください。
+
+### クイックリリース
+
+対話的なリリース準備ツールを使用:
+
+```bash
+npm run release:prepare
+```
+
+このスクリプトは以下を実行します:
+
+1. バージョン番号の更新
+2. CHANGELOGの更新
+3. リリースノートのプレビュー
+4. 変更のコミットとタグ作成
+5. プッシュ（オプション）
+
+### 手動リリース
+
+```bash
+# 1. バージョンを更新
+npm version patch  # または minor, major
+
+# 2. CHANGELOGを更新
+# CHANGELOG.mdを編集
+
+# 3. リリースノートをプレビュー
+npm run release:notes 1.0.0
+
+# 4. 変更をコミット
+git add .
+git commit -m "chore: bump version to 1.0.0"
+
+# 5. タグを作成してプッシュ
+git tag v1.0.0
+git push origin main
+git push origin v1.0.0
+```
+
+タグをプッシュすると、GitHub Actionsが自動的に:
+
+- マルチプラットフォームビルド（Windows, macOS, Linux）
+- マルチアーキテクチャビルド（x64, arm64）
+- コード署名
+- GitHub Releasesへの公開
+
+を実行します。
+
+## 開発者向けドキュメント
+
+- [リリースプロセスガイド](build/RELEASE_PROCESS.md) - 詳細なリリース手順
+- [要件定義書](.kiro/specs/electron-migration/requirements.md) - プロジェクト要件
+- [設計書](.kiro/specs/electron-migration/design.md) - システム設計
+- [タスクリスト](.kiro/specs/electron-migration/tasks.md) - 実装タスク

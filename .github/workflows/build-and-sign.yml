@@ -4,254 +4,277 @@ name: Build and Sign
 # タグプッシュ時に自動的にビルド、署名、リリースを実行
 
 on:
-    push:
-        tags:
-            - "v*"
-    workflow_dispatch:
-        inputs:
-            skip_signing:
-                description: "Skip code signing (for testing)"
-                required: false
-                default: "false"
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      skip_signing:
+        description: "Skip code signing (for testing)"
+        required: false
+        default: "false"
 
 jobs:
-    build-windows:
-        name: Build Windows (x64)
-        runs-on: windows-latest
+  build-windows:
+    name: Build Windows (x64)
+    runs-on: windows-latest
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Build frontend
-              run: npm run build:frontend
+      - name: Build frontend
+        run: npm run build:frontend
 
-            - name: Build Windows application
-              env:
-                  WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
-                  WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: npm run build:win
+      - name: Build Windows application
+        env:
+          WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
+          WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: npm run build:win
 
-            - name: Verify code signature
-              if: ${{ github.event.inputs.skip_signing != 'true' }}
-              run: node build/verify-signing.js
-              continue-on-error: true
+      - name: Verify code signature
+        if: ${{ github.event.inputs.skip_signing != 'true' }}
+        run: node build/verify-signing.js
+        continue-on-error: true
 
-            - name: Upload Windows artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: windows-build
-                  path: |
-                      dist-electron/*.exe
-                      dist-electron/*.zip
-                  retention-days: 7
+      - name: Upload Windows artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: windows-build
+          path: |
+            dist-electron/*.exe
+            dist-electron/*.zip
+          retention-days: 7
 
-    build-macos:
-        name: Build macOS (Universal)
-        runs-on: macos-latest
+  build-macos:
+    name: Build macOS (${{ matrix.arch }})
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
 
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
 
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
 
-            - name: Install dependencies
-              run: npm ci
+      - name: Install dependencies
+        run: npm ci
 
-            - name: Build frontend
-              run: npm run build:frontend
+      - name: Build frontend
+        run: npm run build:frontend
 
-            - name: Import certificates
-              if: ${{ github.event.inputs.skip_signing != 'true' }}
-              env:
-                  CSC_LINK: ${{ secrets.CSC_LINK }}
-                  CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-              run: |
-                  # Keychainを作成
-                  security create-keychain -p actions build.keychain
-                  security default-keychain -s build.keychain
-                  security unlock-keychain -p actions build.keychain
-                  security set-keychain-settings -t 3600 -u build.keychain
+      - name: Import certificates
+        if: ${{ github.event.inputs.skip_signing != 'true' }}
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+        run: |
+          # Keychainを作成
+          security create-keychain -p actions build.keychain
+          security default-keychain -s build.keychain
+          security unlock-keychain -p actions build.keychain
+          security set-keychain-settings -t 3600 -u build.keychain
 
-                  # 証明書をインポート
-                  if [ -n "$CSC_LINK" ]; then
-                    echo "$CSC_LINK" | base64 --decode > certificate.p12
-                    security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
-                    security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
-                    rm certificate.p12
-                  fi
+          # 証明書をインポート
+          if [ -n "$CSC_LINK" ]; then
+            echo "$CSC_LINK" | base64 --decode > certificate.p12
+            security import certificate.p12 -k build.keychain -P "$CSC_KEY_PASSWORD" -T /usr/bin/codesign
+            security set-key-partition-list -S apple-tool:,apple: -s -k actions build.keychain
+            rm certificate.p12
+          fi
 
-            - name: Build macOS application
-              env:
-                  CSC_LINK: ${{ secrets.CSC_LINK }}
-                  CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-                  APPLE_ID: ${{ secrets.APPLE_ID }}
-                  APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
-                  APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-                  SKIP_NOTARIZATION: ${{ github.event.inputs.skip_signing }}
-              run: npm run build:mac
+      - name: Build macOS application (${{ matrix.arch }})
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SKIP_NOTARIZATION: ${{ github.event.inputs.skip_signing }}
+        run: |
+          # アーキテクチャ別にビルド
+          npx electron-builder --mac --${{ matrix.arch }}
 
-            - name: Verify code signature
-              if: ${{ github.event.inputs.skip_signing != 'true' }}
-              run: node build/verify-signing.js
-              continue-on-error: true
+      - name: Verify code signature
+        if: ${{ github.event.inputs.skip_signing != 'true' }}
+        run: node build/verify-signing.js
+        continue-on-error: true
 
-            - name: Cleanup keychain
-              if: always()
-              run: |
-                  security delete-keychain build.keychain || true
-
-            - name: Upload macOS artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: macos-build
-                  path: |
-                      dist-electron/*.dmg
-                      dist-electron/*.zip
-                  retention-days: 7
-
-    build-linux:
-        name: Build Linux (x64)
-        runs-on: ubuntu-latest
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v5
-
-            - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                  node-version: "20"
-                  cache: "npm"
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Build frontend
-              run: npm run build:frontend
-
-            - name: Build Linux application
-              env:
-                  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-              run: npm run build:linux
-
-            - name: Upload Linux artifacts
-              uses: actions/upload-artifact@v4
-              with:
-                  name: linux-build
-                  path: |
-                      dist-electron/*.AppImage
-                      dist-electron/*.deb
-                      dist-electron/*.rpm
-                  retention-days: 7
-
-    create-release:
-        name: Create GitHub Release
-        needs: [build-windows, build-macos, build-linux]
-        runs-on: ubuntu-latest
-        if: startsWith(github.ref, 'refs/tags/')
-
-        steps:
-            - name: Checkout code
-              uses: actions/checkout@v5
-
-            - name: Download all artifacts
-              uses: actions/download-artifact@v4
-              with:
-                  path: artifacts
-
-            - name: Display structure of downloaded files
-              run: ls -R artifacts
-
-            - name: Extract version from tag
-              id: version
-              run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
-
-            - name: Generate release notes
-              id: release_notes
-              run: |
-                  cat > release_notes.md << 'EOF'
-                  ## IconConverter ${{ steps.version.outputs.VERSION }}
-
-                  ### 新機能
-                  - デスクトップアプリケーションとしての配布
-                  - オフライン動作対応
-                  - ネイティブファイルシステム統合
-                  - システムトレイ機能
-
-                  ### ダウンロード
-
-                  #### Windows
-                  - `IconConverter-${{ steps.version.outputs.VERSION }}-Setup.exe` - インストーラー版
-                  - `IconConverter-${{ steps.version.outputs.VERSION }}-portable.exe` - ポータブル版
-
-                  #### macOS
-                  - `IconConverter-${{ steps.version.outputs.VERSION }}.dmg` - DMGインストーラー
-                  - `IconConverter-${{ steps.version.outputs.VERSION }}-mac.zip` - ZIP版
-
-                  #### Linux
-                  - `IconConverter-${{ steps.version.outputs.VERSION }}.AppImage` - AppImage版
-                  - `iconconverter_${{ steps.version.outputs.VERSION }}_amd64.deb` - Debian/Ubuntu用
-                  - `iconconverter-${{ steps.version.outputs.VERSION }}.x86_64.rpm` - RedHat/Fedora用
-
-                  ### システム要件
-                  - **Windows**: Windows 10/11 (x64)
-                  - **macOS**: macOS 12 Monterey以降 (x64/arm64)
-                  - **Linux**: Ubuntu 20.04以降、または同等のディストリビューション
-
-                  ### インストール方法
-                  詳細は [INSTALLATION.md](build/INSTALLATION.md) を参照してください。
-
-                  ### 変更履歴
-                  完全な変更履歴は [CHANGELOG.md](CHANGELOG.md) を参照してください。
-                  EOF
-
-                  echo "RELEASE_NOTES<<EOF" >> $GITHUB_OUTPUT
-                  cat release_notes.md >> $GITHUB_OUTPUT
-                  echo "EOF" >> $GITHUB_OUTPUT
-
-            - name: Create Release
-              uses: softprops/action-gh-release@v1
-              with:
-                  name: IconConverter v${{ steps.version.outputs.VERSION }}
-                  body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
-                  draft: false
-                  prerelease: false
-                  files: |
-                      artifacts/windows-build/*
-                      artifacts/macos-build/*
-                      artifacts/linux-build/*
-              env:
-                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    notify-completion:
-        name: Notify Build Completion
-        needs: [create-release]
-        runs-on: ubuntu-latest
+      - name: Cleanup keychain
         if: always()
+        run: |
+          security delete-keychain build.keychain || true
 
-        steps:
-            - name: Check build status
-              run: |
-                  if [ "${{ needs.create-release.result }}" == "success" ]; then
-                    echo "✓ Build and release completed successfully"
-                  else
-                    echo "✗ Build or release failed"
-                    exit 1
-                  fi
+      - name: Upload macOS artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: macos-build-${{ matrix.arch }}
+          path: |
+            dist-electron/*.dmg
+            dist-electron/*.zip
+          retention-days: 7
+
+  build-linux:
+    name: Build Linux (${{ matrix.arch }})
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        arch: [x64, arm64]
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build frontend
+        run: npm run build:frontend
+
+      - name: Setup QEMU for cross-compilation
+        if: matrix.arch == 'arm64'
+        uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - name: Build Linux application (${{ matrix.arch }})
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # アーキテクチャ別にビルド
+          npx electron-builder --linux --${{ matrix.arch }}
+
+      - name: Upload Linux artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-build-${{ matrix.arch }}
+          path: |
+            dist-electron/*.AppImage
+            dist-electron/*.deb
+            dist-electron/*.rpm
+          retention-days: 7
+
+  create-release:
+    name: Create GitHub Release
+    needs: [build-windows, build-macos, build-linux]
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Download Windows artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: windows-build
+          path: artifacts/windows
+
+      - name: Download macOS x64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build-x64
+          path: artifacts/macos-x64
+
+      - name: Download macOS arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: macos-build-arm64
+          path: artifacts/macos-arm64
+
+      - name: Download Linux x64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build-x64
+          path: artifacts/linux-x64
+
+      - name: Download Linux arm64 artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-build-arm64
+          path: artifacts/linux-arm64
+
+      - name: Display structure of downloaded files
+        run: ls -R artifacts
+
+      - name: Extract version from tag
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Setup Node.js for release notes generation
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Generate release notes
+        id: release_notes
+        env:
+          GITHUB_REPOSITORY: ${{ github.repository }}
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+
+          # リリースノート生成スクリプトを実行
+          node build/generate-release-notes.js "$VERSION"
+
+          # GitHub Actionsの出力に設定
+          {
+            echo "RELEASE_NOTES<<EOF"
+            cat release-notes.md
+            echo "EOF"
+          } >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: IconConverter v${{ steps.version.outputs.VERSION }}
+          body: ${{ steps.release_notes.outputs.RELEASE_NOTES }}
+          draft: false
+          prerelease: false
+          files: |
+            artifacts/windows/*
+            artifacts/macos-x64/*
+            artifacts/macos-arm64/*
+            artifacts/linux-x64/*
+            artifacts/linux-arm64/*
+          fail_on_unmatched_files: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  notify-completion:
+    name: Notify Build Completion
+    needs: [create-release]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check build status
+        run: |
+          if [ "${{ needs.create-release.result }}" == "success" ]; then
+            echo "✓ Build and release completed successfully"
+          else
+            echo "✗ Build or release failed"
+            exit 1
+          fi
