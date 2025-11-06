@@ -64,7 +64,7 @@ jobs:
 
             - name: Upload test results
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: playwright-report-${{ matrix.os }}
                   path: test-results/
@@ -97,7 +97,7 @@ jobs:
 
             - name: Upload accessibility report
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: accessibility-report
                   path: test-results/
@@ -130,7 +130,7 @@ jobs:
 
             - name: Upload performance results
               if: always()
-              uses: actions/upload-artifact@v4
+              uses: actions/upload-artifact@v5
               with:
                   name: performance-results
                   path: test-results/performance-results.json
