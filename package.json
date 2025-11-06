@@ -49,7 +49,7 @@
     "winreg": "^1.2.5"
   },
   "devDependencies": {
-    "@electron/notarize": "^2.5.0",
+    "@electron/notarize": "^3.0.0",
     "@playwright/test": "^1.56.1",
     "axe-core": "^4.11.0",
     "axe-playwright": "^2.2.2",
