@@ -63,7 +63,7 @@ jobs:
               run: npm run build:frontend
 
             - name: Run E2E tests
-              run: npm run test:e2e
+              run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npm run test:e2e
 
             - name: Upload test results
               if: always()
@@ -99,7 +99,7 @@ jobs:
               run: npm run build:frontend
 
             - name: Run accessibility tests
-              run: npm run test:accessibility
+              run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npm run test:accessibility
 
             - name: Upload accessibility report
               if: always()
@@ -135,7 +135,7 @@ jobs:
               run: npm run build:frontend
 
             - name: Run performance tests
-              run: npm run test:performance
+              run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npm run test:performance
 
             - name: Upload performance results
               if: always()
