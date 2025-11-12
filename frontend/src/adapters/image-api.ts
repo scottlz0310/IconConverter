@@ -126,10 +126,7 @@ class WebImageAPI implements ImageAPI {
     const formData = new FormData();
     formData.append('file', file);
     formData.append('preserve_transparency', String(options.preserveTransparency));
-    formData.append('auto_transparent', String(options.autoTransparent));
-    if (options.backgroundColor) {
-      formData.append('background_color', options.backgroundColor);
-    }
+    formData.append('auto_transparent', String(options.autoTransparentBg));
 
     const response = await fetch(`${this.baseURL}/api/convert`, {
       method: 'POST',

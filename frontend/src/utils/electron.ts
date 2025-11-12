@@ -75,8 +75,7 @@ export interface ElectronEnv {
 
 export interface ConversionOptions {
   preserveTransparency: boolean;
-  autoTransparent: boolean;
-  backgroundColor?: string;
+  autoTransparentBg: boolean;
 }
 
 export interface ConversionResult {
