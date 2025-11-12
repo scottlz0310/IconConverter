@@ -62,8 +62,13 @@ jobs:
             - name: Build frontend
               run: npm run build:frontend
 
-            - name: Run E2E tests
+            - name: Run E2E tests (Linux)
+              if: runner.os == 'Linux'
               run: xvfb-run --auto-servernum --server-args="-screen 0 1280x960x24" npm run test:e2e
+
+            - name: Run E2E tests (macOS/Windows)
+              if: runner.os != 'Linux'
+              run: npm run test:e2e
 
             - name: Upload test results
               if: always()

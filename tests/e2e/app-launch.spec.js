@@ -17,7 +17,11 @@ test.describe("アプリケーション起動", () => {
     const startTime = Date.now();
 
     electronApp = await electron.launch({
-      args: [path.join(__dirname, "../../electron/main.js")],
+      args: [
+        path.join(__dirname, "../../electron/main.js"),
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+      ],
       env: {
         ...process.env,
         NODE_ENV: "test",

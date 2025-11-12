@@ -35,7 +35,11 @@ async function measureStartupTime() {
   const startTime = Date.now();
 
   const electronApp = await electron.launch({
-    args: [path.join(__dirname, "../../electron/main.js")],
+    args: [
+      path.join(__dirname, "../../electron/main.js"),
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+    ],
     env: {
       ...process.env,
       NODE_ENV: "test",
@@ -84,7 +88,11 @@ async function measureConversionTime() {
   console.log(`テスト画像サイズ: ${imageSizeMB}MB`);
 
   const electronApp = await electron.launch({
-    args: [path.join(__dirname, "../../electron/main.js")],
+    args: [
+      path.join(__dirname, "../../electron/main.js"),
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+    ],
     env: {
       ...process.env,
       NODE_ENV: "test",
@@ -140,7 +148,11 @@ async function measureMemoryUsage() {
   console.log("\n=== メモリ使用量測定 ===");
 
   const electronApp = await electron.launch({
-    args: [path.join(__dirname, "../../electron/main.js")],
+    args: [
+      path.join(__dirname, "../../electron/main.js"),
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+    ],
     env: {
       ...process.env,
       NODE_ENV: "test",
@@ -186,7 +198,11 @@ async function measureCPUUsage() {
   console.log("\n=== CPU使用量測定 ===");
 
   const electronApp = await electron.launch({
-    args: [path.join(__dirname, "../../electron/main.js")],
+    args: [
+      path.join(__dirname, "../../electron/main.js"),
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+    ],
     env: {
       ...process.env,
       NODE_ENV: "test",
