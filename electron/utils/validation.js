@@ -35,9 +35,11 @@ function sanitizeFilename(filename) {
     .replace(/[<>:"/\\|?*]/g, "_")
     .replace(/\.\./g, "_")
     .replace(/^\.+/, "")
-    .substring(0, 255);
+    .substring(0, 255)
+    .trim();
 
-  if (sanitized.length === 0) {
+  // 空文字、アンダースコアのみ、ドットのみ、またはそれらの組み合わせを拒否
+  if (sanitized.length === 0 || /^[_.]+$/.test(sanitized)) {
     throw new Error("Invalid filename");
   }
 

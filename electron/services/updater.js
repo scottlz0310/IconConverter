@@ -18,6 +18,7 @@ class UpdateManager {
   constructor(mainWindow) {
     this.mainWindow = mainWindow;
     this.updateCheckInterval = null;
+    this.updateCheckTimeout = null;
     this.isChecking = false;
     this.skipVersion = null;
 
@@ -125,7 +126,7 @@ class UpdateManager {
    */
   startPeriodicUpdateCheck() {
     // 起動時に更新チェック
-    setTimeout(() => {
+    this.updateCheckTimeout = setTimeout(() => {
       this.checkForUpdates();
     }, 5000); // 起動から5秒後
 
@@ -367,6 +368,11 @@ class UpdateManager {
     if (this.updateCheckInterval) {
       clearInterval(this.updateCheckInterval);
       this.updateCheckInterval = null;
+    }
+
+    if (this.updateCheckTimeout) {
+      clearTimeout(this.updateCheckTimeout);
+      this.updateCheckTimeout = null;
     }
 
     // イベントリスナーを削除

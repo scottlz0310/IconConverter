@@ -174,7 +174,9 @@ class MemoryManager {
     const totalSeconds = userSeconds + systemSeconds;
 
     // CPU使用率を計算（%）
-    const cpuPercent = (totalSeconds / (timeDelta / 1000)) * 100;
+    // timeDeltaが非常に小さい場合は0を返す（初回呼び出しやテスト時）
+    const cpuPercent =
+      timeDelta > 0 ? (totalSeconds / (timeDelta / 1000)) * 100 : 0;
 
     return {
       user: Math.round(userSeconds * 1000) / 1000,
