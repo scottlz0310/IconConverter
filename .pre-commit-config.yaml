@@ -87,7 +87,8 @@ repos:
               __pycache__/.*|
               frontend/pnpm-lock\.yaml$|
               backend/uv\.lock$|
-              uv\.lock$
+              uv\.lock$|
+              pnpm-lock\.yaml$
           )
 
   # Upgrade Python syntax

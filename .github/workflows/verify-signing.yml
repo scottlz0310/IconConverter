@@ -87,15 +87,20 @@ jobs:
               uses: actions/setup-node@v6
               with:
                   node-version: "24"
-                  cache: "npm"
+                  cache: "pnpm"
+
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
 
             - name: Install dependencies
-              run: npm ci
+              run: pnpm install --frozen-lockfile
 
             - name: Test signing scripts (should skip gracefully)
               run: |
                   # 環境変数なしでビルドを試行（署名はスキップされるべき）
-                  npm run build:frontend
+                  pnpm run build:frontend
 
                   # 署名スクリプトが正常にスキップされることを確認
                   node -e "
