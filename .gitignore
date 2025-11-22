@@ -141,6 +141,7 @@ frontend/build/
 frontend/.vite/
 frontend/.next/
 frontend/out/
+frontend/package-lock.json
 
 # Backend artifacts
 backend/dist/
