@@ -180,7 +180,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           # アーキテクチャ別にビルド
-          pnpm exec electron-builder --linux --${{ matrix.arch }}
+          pnpm exec electron-builder --linux AppImage deb rpm --${{ matrix.arch }}
 
       - name: Upload Linux artifacts
         uses: actions/upload-artifact@v5

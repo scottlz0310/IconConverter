@@ -99,6 +99,10 @@ jobs:
 
             - name: Test signing scripts (should skip gracefully)
               run: |
+                  # フロントエンドの依存関係をインストール
+                  cd frontend && pnpm install --frozen-lockfile
+                  cd ..
+
                   # 環境変数なしでビルドを試行（署名はスキップされるべき）
                   pnpm run build:frontend
 

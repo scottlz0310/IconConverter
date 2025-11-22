@@ -7,9 +7,11 @@
     *   Replaced all `npm run` commands with `pnpm run`.
     *   Moved Windows signing configuration to `signtoolOptions` to be compatible with `electron-builder` v26.
     *   Removed deprecated `signDlls` option.
-    *   **Downgrade**: Downgraded `electron-builder` to `^25.1.8` and reverted Windows signing configuration to be compatible with v25 (moved options back to `win` root).
+    *   **Downgrade**: Downgraded `electron-builder` to `^25.1.8` and reverted Windows signing configuration.
+    *   **Local Build Fix**: Removed `rpm` and `deb` from default Linux targets in `package.json` to avoid requirement for `rpmbuild` on local development machines.
 3.  **Updated CI Workflows**:
-    *   `build-and-sign.yml`: Replaced `npm` with `pnpm`.
+    *   `build-and-sign.yml`: Replaced `npm` with `pnpm`, and explicitly added `AppImage deb rpm` targets to ensure full build in CI.
+    *   `verify-signing.yml`: Added `cd frontend && pnpm install` step to ensure frontend dependencies are available before build.
     *   `electron-tests.yml`: Replaced `npm` with `pnpm`.
     *   `verify-signing.yml`: Replaced `npm` with `pnpm`.
     *   `frontend-test.yml` and `ci-cd.yml` were already using `pnpm` or `uv` correctly.
