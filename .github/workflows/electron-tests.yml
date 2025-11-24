@@ -14,16 +14,16 @@ jobs:
         steps:
             - uses: actions/checkout@v5
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
                   node-version: "24"
                   cache: "pnpm"
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
 
             - name: Install dependencies
               run: pnpm install --frozen-lockfile
@@ -49,22 +49,16 @@ jobs:
         steps:
             - uses: actions/checkout@v5
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
                   node-version: "24"
                   cache: "pnpm"
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Install Playwright browsers
-              run: pnpm exec playwright install --with-deps
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
 
             - name: Get pnpm store directory
               id: pnpm-cache
@@ -79,6 +73,12 @@ jobs:
                   key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-pnpm-store-
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Install Playwright browsers
+              run: pnpm exec playwright install --with-deps
 
             - name: Install frontend dependencies
               working-directory: frontend
@@ -110,22 +110,16 @@ jobs:
         steps:
             - uses: actions/checkout@v5
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
                   node-version: "24"
                   cache: "pnpm"
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Install Playwright browsers
-              run: pnpm exec playwright install --with-deps
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
 
             - name: Get pnpm store directory
               id: pnpm-cache
@@ -140,6 +134,12 @@ jobs:
                   key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-pnpm-store-
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Install Playwright browsers
+              run: pnpm exec playwright install --with-deps
 
             - name: Install frontend dependencies
               working-directory: frontend
@@ -166,22 +166,16 @@ jobs:
         steps:
             - uses: actions/checkout@v5
 
+            - name: Setup pnpm
+              uses: pnpm/action-setup@v4
+              with:
+                  version: 10
+
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
                   node-version: "24"
                   cache: "pnpm"
-
-            - name: Install dependencies
-              run: pnpm install --frozen-lockfile
-
-            - name: Install Playwright browsers
-              run: pnpm exec playwright install --with-deps
-
-            - name: Setup pnpm
-              uses: pnpm/action-setup@v4
-              with:
-                  version: 10
 
             - name: Get pnpm store directory
               id: pnpm-cache
@@ -196,6 +190,12 @@ jobs:
                   key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
                   restore-keys: |
                       ${{ runner.os }}-pnpm-store-
+
+            - name: Install dependencies
+              run: pnpm install --frozen-lockfile
+
+            - name: Install Playwright browsers
+              run: pnpm exec playwright install --with-deps
 
             - name: Install frontend dependencies
               working-directory: frontend
