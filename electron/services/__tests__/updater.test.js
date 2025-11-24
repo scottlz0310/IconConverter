@@ -40,15 +40,6 @@ jest.mock("electron-updater", () => ({
   },
 }));
 
-// electron-logのモック
-jest.mock("electron-log", () => ({
-  transports: {
-    file: {
-      level: "info",
-    },
-  },
-}));
-
 // fsのモック
 jest.mock("fs", () => ({
   promises: {
