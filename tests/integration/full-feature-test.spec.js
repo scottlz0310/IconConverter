@@ -72,9 +72,20 @@ test.describe("全機能テスト - IconConverter Electron", () => {
     // アプリを終了
     if (electronApp) {
       try {
-        await electronApp.close();
+        // Try to close gracefully with timeout
+        await Promise.race([
+          electronApp.close(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Close timeout")), 5000),
+          ),
+        ]);
       } catch (error) {
-        console.error("Error closing app:", error);
+        // Force kill if graceful close fails
+        try {
+          await electronApp.process().kill();
+        } catch (killError) {
+          console.error("Failed to kill electron process:", killError);
+        }
       }
     }
   });

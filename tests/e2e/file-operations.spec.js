@@ -32,7 +32,22 @@ test.describe("ファイル操作", () => {
 
   test.afterEach(async () => {
     if (electronApp) {
-      await electronApp.close();
+      try {
+        // Try to close gracefully with timeout
+        await Promise.race([
+          electronApp.close(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error("Close timeout")), 5000),
+          ),
+        ]);
+      } catch (error) {
+        // Force kill if graceful close fails
+        try {
+          await electronApp.process().kill();
+        } catch (killError) {
+          console.error("Failed to kill electron process:", killError);
+        }
+      }
     }
   });
 
