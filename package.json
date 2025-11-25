@@ -245,5 +245,12 @@
     "asarUnpack": [
       "node_modules/sharp/**/*"
     ]
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "electron",
+      "electron-builder",
+      "sharp"
+    ]
   }
 }
