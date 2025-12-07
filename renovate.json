@@ -1,4 +1,10 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended"]
+  "extends": [
+    "github>scottlz0310/renovate-config",
+    "github>scottlz0310/renovate-config:nodejs",
+    "github>scottlz0310/renovate-config:typescript",
+    "github>scottlz0310/renovate-config:python",
+    "github>scottlz0310/renovate-config:docker"
+  ]
 }
