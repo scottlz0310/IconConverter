@@ -313,3 +313,6 @@ publish/
 release.properties
 replay_pid*
 target/
+
+# Auto-generated entries from templates
+.pyrightcache/
