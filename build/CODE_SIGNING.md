@@ -68,6 +68,15 @@ export WIN_CSC_KEY_PASSWORD="your-password"
 npm run build:win
 ```
 
+### ローカルテスト（署名をスキップ）
+
+ローカル環境で署名証明書がない場合や、署名なしでビルドを行いたいときは、`build:win:nosign` を使用できます。これは `package.json` のオーバーライド設定を使って `certificateSubjectName` を無効化するだけで、CIでは従来通り署名が行われます。
+
+```bash
+# Windows（署名をスキップ）
+pnpm run build:win:nosign
+```
+
 ### 5. 署名の確認
 
 ```bash
@@ -156,21 +165,21 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build Windows
         env:
           WIN_CSC_LINK: ${{ secrets.WIN_CSC_LINK }}
           WIN_CSC_KEY_PASSWORD: ${{ secrets.WIN_CSC_KEY_PASSWORD }}
         run: npm run build:win
-      
+
       - name: Verify signature
         run: node build/verify-signing.js
 
@@ -178,15 +187,15 @@ jobs:
     runs-on: macos-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build macOS
         env:
           CSC_LINK: ${{ secrets.CSC_LINK }}
@@ -195,7 +204,7 @@ jobs:
           APPLE_ID_PASSWORD: ${{ secrets.APPLE_ID_PASSWORD }}
           APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
         run: npm run build:mac
-      
+
       - name: Verify signature
         run: node build/verify-signing.js
 
@@ -203,15 +212,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
-      
+
       - name: Setup Node.js
         uses: actions/setup-node@v3
         with:
           node-version: '20'
-      
+
       - name: Install dependencies
         run: npm ci
-      
+
       - name: Build Linux
         run: npm run build:linux
 ```

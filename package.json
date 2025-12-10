@@ -14,6 +14,7 @@
     "build:frontend": "cd frontend && pnpm run build",
     "build:electron": "electron-builder",
     "build:win": "electron-builder --win",
+    "build:win:nosign": "electron-builder --win --config build/no-sign.json",
     "build:mac": "electron-builder --mac",
     "build:linux": "electron-builder --linux",
     "package": "pnpm run build && electron-builder --publish never",

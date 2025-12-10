@@ -70,6 +70,9 @@ npm run build:frontend
 # Windows用
 npm run build:win
 
+# Windows（署名をスキップしてローカルビルドを行う場合）
+npm run build:win:nosign
+
 # macOS用
 npm run build:mac
 
