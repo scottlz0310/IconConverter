@@ -1,7 +1,7 @@
 # フロントエンドDockerfile - マルチステージビルド（React + Vite + nginx）
 
 # ステージ1: ビルダー
-FROM node:24-alpine AS builder
+FROM node:24.12.0-alpine AS builder
 
 # 作業ディレクトリの設定
 WORKDIR /app
