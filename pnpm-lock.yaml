@@ -12,10 +12,10 @@ importers:
         specifier: ^5.4.3
         version: 5.4.3
       electron-updater:
-        specifier: ^6.3.9
+        specifier: ^6.6.2
         version: 6.6.2
       sharp:
-        specifier: ^0.34.0
+        specifier: ^0.34.5
         version: 0.34.5
       winreg:
         specifier: ^1.2.5
