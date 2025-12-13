@@ -1,5 +1,5 @@
 # フロントエンド開発環境用Dockerfile
-FROM node:24-alpine
+FROM node:24.0.2-alpine
 
 # 作業ディレクトリの設定
 WORKDIR /app
