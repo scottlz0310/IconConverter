@@ -22,7 +22,7 @@
     "test:performance": "node scripts/performance-test.js"
   },
   "dependencies": {
-    "@tanstack/react-query": "^5.90.6",
+    "@tanstack/react-query": "^5.90.12",
     "axios": "^1.13.1",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
