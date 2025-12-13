@@ -22,7 +22,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
-                  node-version: "24"
+                  node-version: "24.0.2"
                   cache: "pnpm"
 
             - name: Install dependencies
@@ -57,7 +57,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
-                  node-version: "24"
+                  node-version: "24.0.2"
                   cache: "pnpm"
 
             - name: Get pnpm store directory
@@ -118,7 +118,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
-                  node-version: "24"
+                  node-version: "24.0.2"
                   cache: "pnpm"
 
             - name: Get pnpm store directory
@@ -174,7 +174,7 @@ jobs:
             - name: Setup Node.js
               uses: actions/setup-node@v6
               with:
-                  node-version: "24"
+                  node-version: "24.0.2"
                   cache: "pnpm"
 
             - name: Get pnpm store directory
