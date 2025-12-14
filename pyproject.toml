@@ -19,8 +19,8 @@ classifiers = [
 ]
 dependencies = [
     "loguru>=0.7.3",
-    "numpy>=2.3.2",
-    "pillow>=11.3.0",
+    "numpy>=2.3.5",
+    "pillow>=12.0.0",
 ]
 
 
@@ -94,11 +94,11 @@ skips = ["B101"]  # B101: Use of assert detected (テストファイルで必要
 
 [dependency-groups]
 dev = [
-    "pytest>=8.4.1",
-    "pytest-cov>=6.0.0",
-    "ruff>=0.8.0",
+    "pytest>=9.0.2",
+    "pytest-cov>=7.0.0",
+    "ruff>=0.8.6",
     "mypy>=1.13.0",
-    "pre-commit>=4.0.0",
+    "pre-commit>=4.0.1",
     "detect-secrets>=1.5.0",
-    "safety>=3.6.2",
+    "safety>=3.7.0",
 ]
